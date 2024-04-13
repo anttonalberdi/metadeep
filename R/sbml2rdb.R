@@ -19,7 +19,7 @@ sbml2rdb <- function(sbml) {
   } else if (is.character(sbml) && file.exists(sbml)) {
     reactions <- readSBML(sbml)$reactions
   } else {
-    print("Input is neither an SBMLR object nor a valid file.")
+    stop("Input is neither an SBMLR object nor a valid file.")
   }
 
   #Convert sbml to reaction database
