@@ -4,16 +4,15 @@
 #' @keywords SBML tibble reaction reactant product rdb
 #' @description Classification of metabolites in multiple genomes into source, transit and sink metabolites
 #' @param rdb An rdb object produced by sbml2rdb().
-#' @import tidyverse SBMLR
+#' @import tidyverse
 #' @examples
-#' rdbs2mdbs(allgenomes_rdbs)
-#' list.files(path = "data", pattern = "\\.sbml$", full.names = TRUE) %>% sbml2rdb() %>% rdbs2mdbs()
+#' rdbs2mdb(allgenomes_rdbs)
 #' @references
 #' Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110
 #' @export
 
 
-rdbs2mdbs <- function(rdbs) {
+rdbs2mdb <- function(rdbs) {
   # Input check
   if (inherits(rdbs, "rdbs")) {
     rdbs <- rdbs
@@ -26,6 +25,9 @@ rdbs2mdbs <- function(rdbs) {
   #Create reaction database
   mdb <- map_df(rdbs, rdb2mdb) %>%
     mutate(genome=names(rdbs))
+
+  #Add class
+  class(mdb) <- c("mdb", class(mdb))
 
   # Output reaction database
   return(mdb)

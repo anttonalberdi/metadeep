@@ -4,7 +4,7 @@
 #' @keywords SBML tibble reaction reactant product rdb
 #' @description Classification of metabolites in a single genome into source, transit and sink metabolites
 #' @param rdb An rdb object produced by sbml2rdb().
-#' @import tidyverse SBMLR
+#' @import tidyverse
 #' @examples
 #' rdb2mdb(genome1_rdb)
 #' sbml2rdb("data/genome1.sbml") %>% rdb2mdb()
@@ -36,6 +36,9 @@ rdb2mdb <- function(rdb) {
          sinks=list(sinks),
          reactions=rdb,
          metabolites=metabolites)
+
+  #Add class
+  class(mdb) <- c("mdb", class(mdb))
 
   # Output reaction database
   return(mdb)
