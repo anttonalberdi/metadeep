@@ -1,6 +1,6 @@
 # MetaDEEP
 
-etaDEEP is an R package to analyse metabolic dependence and exchange metrics from genome-scale metabolic networks (GSMN).
+MetaDEEP is an R package to analyse metabolic dependence and exchange metrics from genome-scale metabolic networks (GSMN).
 
 ## Installation
 
@@ -12,6 +12,13 @@ library(devtools)
 install_github("anttonalberdi/metadeep")
 library(metadeep)
 ```
+
+### Dependencies
+
+MetaDEEP only has two strict dependencies:
+
+- [tidyverse](https://www.tidyverse.org)
+- [SBMLR](https://www.bioconductor.org/packages/release/bioc/html/SBMLR.html)
 
 ## Usage
 Basic usage of MetaDEEP package
@@ -96,6 +103,9 @@ Calculate the capacity of each genome to provide or receive metabolites to/from 
 
 In strict mode (default) only source and sink metabolites are considered for cross-feeding calculations. 
 
+- **Forward:** sink metabolites of ***first*** that are source for ***second***
+- **Reverse:** sink metabolites of ***second*** that are source for ***first***
+
 ```r
 allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb)
 ```
@@ -113,6 +123,9 @@ allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb)
 
 In loose mode source, transit and sink metabolites are considered for cross-feeding calculations.
 
+- **Forward:** transit and sink metabolites of ***first*** that are source for ***second***
+- **Reverse:** transit and sink metabolites of ***second*** that are source for ***first***
+
 ```r
 allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb, mode="loose")
 ```
@@ -125,3 +138,47 @@ allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb, mode="loose")
 | genome2  | genome3 | <chr [37]> | <chr [38]> | <chr [75]> |
 | genome2  | genome4 | <chr [40]> | <chr [41]> | <chr [81]> |
 | genome3  | genome4 | <chr [19]> | <chr [19]> | <chr [38]> |
+
+### Convert cross-feeding database to exchange matrix
+
+#### Total exchange
+
+Number of total metabolites genomes in columns and rows can exchange with each other.
+
+```r
+allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb)
+```
+
+| genomes | genome2 | genome3 | genome4 |
+|---------|---------|---------|---------|
+| genome1 |       2 |       3 |       5 |
+| genome2 |      NA |       4 |      12 |
+| genome3 |      NA |      NA |       7 |
+
+#### Forward exchange
+
+Number of metabolites genomes in columns can provide to genomes in rows.
+
+```r
+allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb, mode="forward")
+```
+
+| genomes | genome2 | genome3 | genome4 |
+|---------|---------|---------|---------|
+| genome1 |       1 |       2 |       1 |
+| genome2 |      NA |       2 |       6 |
+| genome3 |      NA |      NA |       4 |
+
+#### Reverse exchange
+
+Number of metabolites genomes in riws can provide to genomes in columns.
+
+```r
+allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb, mode="reverse")
+```
+
+| genomes | genome2 | genome3 | genome4 |
+|---------|---------|---------|---------|
+| genome1 |       1 |       1 |       4 |
+| genome2 |      NA |       2 |       6 |
+| genome3 |      NA |      NA |       3 |

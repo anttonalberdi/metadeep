@@ -53,6 +53,6 @@ mdb2cfdb <- function(mdb, mode="strict") {
   #Add class
   class(cfdb) <- c("cfdb", class(cfdb))
 
-  # Output cross-feeding database
+  #Output cross-feeding database
   return(cfdb)
 }
