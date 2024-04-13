@@ -1,2 +1,3 @@
-# metadeep
-Metabolic Dependence and Exchange Evaluation Platform
+# MetaDEEP
+
+Metabolic Dependence and Exchange Evaluation Platform in R.
