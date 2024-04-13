@@ -41,6 +41,21 @@ genome1_rdb <- readSBML("data/genome1.sbml") %>% sbml2rdb()
 | R_3__46__1__46__26__46__4__45__RXN| <chr [2]>    | <chr [2]>    |
 | R_CARDIOLIPSYN__45__RXN           | <chr [1]>    | <chr [2]>    |
 
+#### Explore a specific reaction
+
+It is possible to visualise the metabolites involved in each reaction.
+
+```r
+genome1_rdb %>% 
+    filter(reaction == "R_RXN__45__18707") 
+    %>% unnest()
+```
+
+| reaction         | reactants                                           | products                                      |
+|------------------|-----------------------------------------------------|-----------------------------------------------|
+| R_RXN__45__18707 | M_L__45__Cysteine__45__Desulfurase__45__persulfide_c | M_Cysteine__45__Desulfurase__45__L__45__cystei… |
+| R_RXN__45__18707 | M_TusA__45__L__45__cysteine_c                       | M_TusA__45__Persulfides_c                    |
+
 ### Load multiple SBML (sbmls2rdb)
 Convert multiple SBML files into a list of MetaDEEP reaction databases (rdb). The resulting object is a list of tibbles containing character lists of reactants and products of each reaction.
 
