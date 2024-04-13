@@ -2,5 +2,6 @@
 
 export(rdb2mdb)
 export(sbml2rdb)
+export(sbmls2rdb)
 import(SBMLR)
 import(tidyverse)
