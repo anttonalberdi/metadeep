@@ -26,6 +26,14 @@ cfdb2igraph <- function(cfdb, mode="total") {
     as.matrix() %>%
     graph_from_adjacency_matrix(., weighted = TRUE, mode = "upper", diag = FALSE)
 
+  #Set directionality
+  if(mode == "forward"){
+    igraph <- as.directed(igraph, mode="arbitrary")}
+  if(mode == "reverse"){
+    igraph <- as.directed(igraph, mode="arbitrary")
+    igraph <- reverse_edges(igraph, eids = E(igraph))
+    }
+
   #Output cross-feeding matrix
   return(igraph)
 }

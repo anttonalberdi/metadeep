@@ -15,10 +15,11 @@ library(metadeep)
 
 ### Dependencies
 
-MetaDEEP only has two strict dependencies:
+MetaDEEP only has three strict dependencies:
 
 - [tidyverse](https://www.tidyverse.org)
 - [SBMLR](https://www.bioconductor.org/packages/release/bioc/html/SBMLR.html)
+- [igraph](https://igraph.org)
 
 ## Usage
 Basic usage of MetaDEEP package
@@ -173,7 +174,7 @@ allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb)
 
 #### Forward exchange
 
-Number of metabolites genomes in columns can provide to genomes in rows.
+Number of metabolites genomes in rows can provide to genomes in columns.
 
 ```r
 allgenomes_exchange_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
@@ -188,7 +189,7 @@ allgenomes_exchange_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
 
 #### Reverse exchange
 
-Number of metabolites genomes in riws can provide to genomes in columns.
+Number of metabolites genomes in rows can acquire to genomes in columns.
 
 ```r
 allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
@@ -204,26 +205,38 @@ allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
 ### Convert cross-feeding database to igraph network (cfdb2igraph)
 
 ```r
-allgenomes_exchange_igraph <- cfdb2igraph(allgenomes_cfdb)
+allgenomes_exchange_igraph_total <- cfdb2igraph(allgenomes_cfdb)
 ```
 
-The network can be visualised:
+```r
+allgenomes_exchange_igraph_forward <- cfdb2igraph(allgenomes_cfdb, mode="forward")
+```
 
 ```r
-plot(allgenomes_exchange_igraph, 
-      layout = layout_with_fr(allgenomes_exchange_total_igraph), 
+allgenomes_exchange_igraph_reverse <- cfdb2igraph(allgenomes_cfdb, mode="reverse")
+```
+
+The networks can be visualised:
+
+```r
+plot(allgenomes_exchange_igraph_total, 
+      layout = layout_with_fr(allgenomes_exchange_igraph_total), 
       #vertex attributes
       vertex.color="#82CEC1",
       vertex.frame.color="#59AA9C",
       vertex.label.color="black",
       #edge attributes
-      edge.label = E(allgenomes_exchange_total_igraph)$weight, 
-      edge.width = E(allgenomes_exchange_total_igraph)$weight,
+      edge.label = E(allgenomes_exchange_igraph_total)$weight, 
+      edge.width = E(allgenomes_exchange_igraph_total)$weight,
       edge.curved = 0.1,
       edge.color="#cccccc",
-      edge.label.color="#8E8E1E"
+      edge.label.color="#8E8E1E",
+      edge.arrow.size=1, 
+      edge.arrow.width=1
       )
 ```
+
+![Metabolite exchange networks](figures/exchange_networks.png)
 
 ### Calculate donor and receptor potential
 
