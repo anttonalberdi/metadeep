@@ -189,7 +189,7 @@ allgenomes_exchange_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
 
 #### Reverse exchange
 
-Number of metabolites genomes in rows can acquire to genomes in columns.
+Number of metabolites genomes in rows can acquire from genomes in columns.
 
 ```r
 allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
@@ -206,13 +206,9 @@ allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
 
 ```r
 allgenomes_exchange_igraph_total <- cfdb2igraph(allgenomes_cfdb)
-```
 
-```r
 allgenomes_exchange_igraph_forward <- cfdb2igraph(allgenomes_cfdb, mode="forward")
-```
 
-```r
 allgenomes_exchange_igraph_reverse <- cfdb2igraph(allgenomes_cfdb, mode="reverse")
 ```
 
