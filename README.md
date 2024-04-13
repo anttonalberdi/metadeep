@@ -1,4 +1,5 @@
 # MetaDEEP
+### **Meta**bolic **D**ependence and **E**xchange **E**valuation **P**latform
 
 MetaDEEP is an R package to analyse metabolic dependence and exchange metrics from genome-scale metabolic networks (GSMN).
 
