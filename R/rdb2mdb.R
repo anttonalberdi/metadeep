@@ -1,21 +1,23 @@
 #' Classification of metabolites
-#' @title Classification of metabolites
+#' @title Classification of metabolites of a single genome
 #' @author Antton Alberdi, \email{anttonalberdi@gmail.com}
 #' @keywords SBML tibble reaction reactant product rdb
-#' @description Classification of metabolites into source, transit and sink metabolites
+#' @description Classification of metabolites in a single genome into source, transit and sink metabolites
 #' @param rdb An rdb object produced by sbml2rdb().
 #' @import tidyverse SBMLR
 #' @examples
-#' metaclass(rdb1)
-#' sbml2rdb("data/genome1.sbml") %>% metaclass()
+#' rdb2mdb(genome1_rdb)
+#' sbml2rdb("data/genome1.sbml") %>% rdb2mdb()
 #' @references
 #' Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110
 #' @export
 
 rdb2mdb <- function(rdb) {
   # Input check
-  if (inherits(rdb, "tbl") & identical(colnames(rdb), c("reaction", "reactants", "products"))) {
+  if (inherits(rdb, "rdb")) {
     rdb <- rdb
+  } else if (inherits(rdb, "rdbs")) {
+    stop("Input is a multi-genome object, use rdbs2mdbs() instead.")
   } else {
     stop("Input is not a valid rdb object created by sbml2rdb().")
   }

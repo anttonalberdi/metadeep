@@ -29,6 +29,9 @@ sbml2rdb <- function(sbml) {
     products = lapply(reactions, function(x) x$products)
   )
 
+  #Add class
+  class(rdb) <- c("rdb", class(rdb))
+
   # Output reaction database
   return(rdb)
 }
