@@ -14,5 +14,6 @@ RoxygenNote: 7.3.1
 Depends:
     R (>= 4.1.2),
     tidyverse,
-    SBMLR
+    SBMLR,
+    igraph
 

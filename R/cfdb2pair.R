@@ -20,6 +20,10 @@ cfdb2pair <- function(cfdb, mode="total") {
     stop("Input is not a valid cfdb object created by mdb2cfdb().")
   }
 
+  #Identify first and last genomes
+  firstgenome <- allgenomes_cfdb %>% arrange(first) %>% head(1) %>% pull(first)
+  lastgenome <- allgenomes_cfdb %>% arrange(second) %>% tail(1) %>% pull(second)
+
   #Generate exchange matrix
   pair <- cfdb %>%
     select(first,second,{{ mode }}) %>%
@@ -27,7 +31,11 @@ cfdb2pair <- function(cfdb, mode="total") {
     mutate(exchange = length(exchange)) %>%
     arrange(first,second) %>%
     pivot_wider(names_from = second, values_from = exchange, values_fill = NA) %>%
-    rename(genomes=1)
+    mutate(firstcol=NA, .before = 2) %>%
+    rename(genomes=1) %>%
+    add_row(genomes = NA) %>%
+    rename(!! firstgenome := 2) %>%
+    mutate(genomes = if_else(row_number() == n(), {{ lastgenome }}, genomes))
 
   #Output cross-feeding matrix
   return(pair)

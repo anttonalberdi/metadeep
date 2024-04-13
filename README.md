@@ -164,11 +164,12 @@ Number of total metabolites genomes in columns and rows can exchange with each o
 allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb)
 ```
 
-| genomes | genome2 | genome3 | genome4 |
-|---------|---------|---------|---------|
-| genome1 |       2 |       3 |       5 |
-| genome2 |      NA |       4 |      12 |
-| genome3 |      NA |      NA |       7 |
+| genomes | genome1 | genome2 | genome3 | genome4 |
+|---------|---------|---------|---------|---------|
+| genome1 | NA      | 2       | 3       | 5       |
+| genome2 | NA      | NA      | 4       | 12      |
+| genome3 | NA      | NA      | NA      | 7       |
+| genome4 | NA      | NA      | NA      | NA      |
 
 #### Forward exchange
 
@@ -178,11 +179,12 @@ Number of metabolites genomes in columns can provide to genomes in rows.
 allgenomes_exchange_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
 ```
 
-| genomes | genome2 | genome3 | genome4 |
-|---------|---------|---------|---------|
-| genome1 |       1 |       2 |       1 |
-| genome2 |      NA |       2 |       6 |
-| genome3 |      NA |      NA |       4 |
+| genomes | genome1 | genome2 | genome3 | genome4 |
+|---------|---------|---------|---------|---------|
+| genome1 | NA      | 1       | 2       | 1       |
+| genome2 | NA      | NA      | 2       | 6       |
+| genome3 | NA      | NA      | NA      | 4       |
+| genome4 | NA      | NA      | NA      | NA      |
 
 #### Reverse exchange
 
@@ -192,8 +194,65 @@ Number of metabolites genomes in riws can provide to genomes in columns.
 allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
 ```
 
-| genomes | genome2 | genome3 | genome4 |
-|---------|---------|---------|---------|
-| genome1 |       1 |       1 |       4 |
-| genome2 |      NA |       2 |       6 |
-| genome3 |      NA |      NA |       3 |
+| genomes | genome1 | genome2 | genome3 | genome4 |
+|---------|---------|---------|---------|---------|
+| genome1 | NA      | 1       | 1       | 4       |
+| genome2 | NA      | NA      | 2       | 6       |
+| genome3 | NA      | NA      | NA      | 3       |
+| genome4 | NA      | NA      | NA      | NA      |
+
+### Convert cross-feeding database to igraph network (cfdb2igraph)
+
+```r
+allgenomes_exchange_igraph <- cfdb2igraph(allgenomes_cfdb)
+```
+
+The network can be visualised:
+
+```r
+plot(allgenomes_exchange_igraph, 
+      layout = layout_with_fr(allgenomes_exchange_total_igraph), 
+      #vertex attributes
+      vertex.color="#82CEC1",
+      vertex.frame.color="#59AA9C",
+      vertex.label.color="black",
+      #edge attributes
+      edge.label = E(allgenomes_exchange_total_igraph)$weight, 
+      edge.width = E(allgenomes_exchange_total_igraph)$weight,
+      edge.curved = 0.1,
+      edge.color="#cccccc",
+      edge.label.color="#8E8E1E"
+      )
+```
+
+### Calculate donor and receptor potential
+
+#### Donor potential (donor)
+
+Capacity of each bacterium to provide other bacteria with metabolites.
+
+```r
+allgenomes_donor <- donor(allgenomes_cfdb)
+```
+
+| genome  | metabolites | receptors_n | metabolites_n |
+|---------|-------------|-------------|---------------|
+| genome1 | <chr [4]>   |           3 |             4 |
+| genome2 | <chr [8]>   |           3 |             8 |
+| genome3 | <chr [7]>   |           3 |             7 |
+| genome4 | <chr [10]>  |           3 |            10 |
+
+#### Receptor potential (receptor)
+
+Capacity of each bacterium to receive metabolites from other bacteria.
+
+```r
+allgenomes_receptor <- receptor(allgenomes_cfdb)
+```
+
+| genome  | metabolites | donors_n | metabolites_n |
+|---------|-------------|----------|---------------|
+| genome1 | <chr [6]>   |        3 |             6 |
+| genome2 | <chr [8]>   |        3 |             8 |
+| genome3 | <chr [7]>   |        3 |             7 |
+| genome4 | <chr [9]>   |        3 |             9 |
