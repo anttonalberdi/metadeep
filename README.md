@@ -160,7 +160,7 @@ allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb)
 Number of metabolites genomes in columns can provide to genomes in rows.
 
 ```r
-allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb, mode="forward")
+allgenomes_exchange_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
 ```
 
 | genomes | genome2 | genome3 | genome4 |
@@ -174,7 +174,7 @@ allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb, mode="forward")
 Number of metabolites genomes in riws can provide to genomes in columns.
 
 ```r
-allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb, mode="reverse")
+allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
 ```
 
 | genomes | genome2 | genome3 | genome4 |
