@@ -11,7 +11,7 @@ donor(cfdb, abundance, focal)
 
 \item{abundance}{An optional data frame containing relative abundance data of bacteria}
 
-\item{focal}{An optional focal genome name to calculate donor potential}
+\item{focal}{An optional focal genome name or vector of genome names to calculate donor potential}
 }
 \description{
 Calculation of donor potential of each genome
@@ -21,6 +21,9 @@ Calculation of donor potential
 }
 \examples{
 donor(allgenomes_cfdb)
+donor(allgenomes_cfdb, abundance=genome_abundances)
+donor(allgenomes_cfdb, abundance=genome_abundances, focal="genome1")
+donor(allgenomes_cfdb, focal=c("genome1","genome2"))
 }
 \references{
 Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110

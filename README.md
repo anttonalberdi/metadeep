@@ -113,7 +113,7 @@ allgenomes_mdb <- rdbs2mdb(allgenomes_rdbs)
 
 ### Calculate cross-feeding potential (mdb2cfdb)
 
-Calculate the capacity of each genome to provide or receive metabolites to/from other genomes. The resulting object is a tibble containing all pairwise combinations of genomes and their bi-directional as well as overall metabolite exchanhe capacities.
+Calculate the capacity of each genome to provide or receive metabolites to/from other genomes. The resulting object is a tibble containing all pairwise combinations of genomes and their bi-directional as well as overall metabolite exchange capacities.
 
 #### Strict mode 
 

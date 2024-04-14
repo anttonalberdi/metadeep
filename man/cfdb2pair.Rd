@@ -4,12 +4,14 @@
 \alias{cfdb2pair}
 \title{Convert cross-feeding database (cfdb) to pairwise matrix}
 \usage{
-cfdb2pair(cfdb, mode = "total")
+cfdb2pair(cfdb, mode = "total", abundance)
 }
 \arguments{
 \item{cfdb}{A cross-feeding database (cfdb) generated using mdb2cfdb()}
 
 \item{mode}{Whether to calculate forward (columns to rows), reverse (rows to columns) or total metabolite exchanges. Default is mode="total".}
+
+\item{abundance}{An optional data frame containing relative abundance data of bacteria}
 }
 \description{
 Convert cross-feeding database (cfdb) to pairwise matrix
