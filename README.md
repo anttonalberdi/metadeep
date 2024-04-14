@@ -303,6 +303,16 @@ Note how in sample1, in which relative abundances of all bacteria are even, the 
 
 The values in sample2 and sample3 are very different to the baseline donor potential, because relative abundances are very uneven. The bacteria with high relative abundances (genome1 and genome2 in sample2; genome1 in sample3) have a much higher capacity to provide metabolites to other bacteria, because they are much more abundant.
 
+It is also possible to focus on a single genome using the ***focus*** argument. This is mainly useful when working with large quantities of genomes, to speed up computation.
+
+```r
+genome1_donor <- donor(allgenomes_cfdb, abundance=genome_abundances, focal="genome1")
+```
+
+| genome  | sample1 | sample2 | sample3 |
+|---------|---------|---------|---------|
+| genome1 |       4 |      13 |      68 |
+
 #### Receptor potential (receptor)
 
 ```r
