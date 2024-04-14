@@ -5,10 +5,13 @@
 #' @description Calculation of donor potential of each genome
 #' @param cfdb A cross-feeding database (cfdb) generated using mdb2cfdb()
 #' @param abundance An optional data frame containing relative abundance data of bacteria
-#' @param focal An optional focal genome name to calculate donor potential
+#' @param focal An optional focal genome name or vector of genome names to calculate donor potential
 #' @import tidyverse
 #' @examples
 #' donor(allgenomes_cfdb)
+#' donor(allgenomes_cfdb, abundance=genome_abundances)
+#' donor(allgenomes_cfdb, abundance=genome_abundances, focal="genome1")
+#' donor(allgenomes_cfdb, focal=c("genome1","genome2"))
 #' @references
 #' Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110
 #' @export
@@ -37,11 +40,10 @@ donor <- function(cfdb, abundance, focal) {
         summarize(metabolites = list(unique(unlist(reverse))), receptors_n=n()) %>%
         mutate(metabolites_n = map_int(metabolites, length)) %>%
         rename(genome=1)
-
     } else {
       forward <- cfdb %>%
         filter(length(forward) > 0) %>%
-        filter(first == focal) %>%
+        filter(first %in% focal) %>%
         group_by(first) %>%
         summarize(metabolites = list(unique(unlist(forward))), receptors_n=n()) %>%
         mutate(metabolites_n = map_int(metabolites, length)) %>%
@@ -49,7 +51,7 @@ donor <- function(cfdb, abundance, focal) {
 
       reverse <- cfdb %>%
         filter(length(reverse) > 0) %>%
-        filter(second == focal) %>%
+        filter(second %in% focal) %>%
         group_by(second) %>%
         summarize(metabolites = list(unique(unlist(reverse))), receptors_n=n()) %>%
         mutate(metabolites_n = map_int(metabolites, length)) %>%
@@ -66,23 +68,30 @@ donor <- function(cfdb, abundance, focal) {
 
   # If abundance data is provided
   if(!missing(abundance)){
+
+    #Force relative abundance transformation
+    abundance <- abundance %>%
+      mutate(across(where(is.double), ~ ./sum(.)))
+
     if(missing(focal)){
       forward <- cfdb %>%
         # Append abundance values of first and second genomes
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_first"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_firstX"), -1),
                   by=join_by(first==genome)) %>%
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_second"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_secondX"), -1),
                   by=join_by(second==genome)) %>%
         select(-reverse,-total) %>% 			# Drop reverse and total columns
         unnest(cols = forward) %>% 			# Expand metabolites
-        pivot_longer(cols = starts_with("sample"), 	# Pivot longer to create one column per sample
+        pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
                      names_to = c(".value", "sample"),
-                     names_sep = "_") %>%
+                     names_pattern = "(.+)_(firstX|secondX)",
+                     values_drop_na = TRUE) %>%
         # Calculate the ratio between donor and pool of receptors for each metabolite
         group_by(first,forward) %>%
-        summarise(across(where(is.double), ~max(.x[sample == "first"]) / sum(.x[sample == "second"])), .groups = "drop") %>%
+        #summarise(across(where(is.double), ~max(.x[sample == "firstX"]) / sum(.x[sample == "secondX"])), .groups = "drop") %>% #without topping
+        summarise(across(where(is.double), ~ pmin(1, max(.x[sample == "firstX"]) / sum(.x[sample == "secondX"]))), .groups = "drop") %>%
         # Calculate the donor potential per genome
         group_by(first) %>%
         summarise(across(where(is.double), sum)) %>%
@@ -90,20 +99,22 @@ donor <- function(cfdb, abundance, focal) {
 
       reverse <- cfdb %>%
         # Append abundance values of first and second genomes
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_first"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_firstX"), -1),
                   by=join_by(first==genome)) %>%
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_second"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_secondX"), -1),
                   by=join_by(second==genome)) %>%
         select(-forward,-total) %>% 			# Drop reverse and total columns
         unnest(cols = reverse) %>% 			# Expand metabolites
-        pivot_longer(cols = starts_with("sample"), 	# Pivot longer to create one column per sample
+        pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
                      names_to = c(".value", "sample"),
-                     names_sep = "_") %>%
+                     names_pattern = "(.+)_(firstX|secondX)",
+                     values_drop_na = TRUE) %>%
         # Calculate the ratio between donor and pool of receptors for each metabolite
         group_by(second, reverse) %>%
-        summarise(across(where(is.double), ~max(.x[sample == "second"]) / sum(.x[sample == "first"])), .groups = "drop") %>%
+        #summarise(across(where(is.double), ~max(.x[sample == "secondX"]) / sum(.x[sample == "firstX"])), .groups = "drop") %>% #without topping
+        summarise(across(where(is.double), ~ pmin(1, max(.x[sample == "secondX"]) / sum(.x[sample == "firstX"]))), .groups = "drop") %>%
         # Calculate the donor potential per genome
         group_by(second) %>%
         summarise(across(where(is.double), sum)) %>%
@@ -112,44 +123,48 @@ donor <- function(cfdb, abundance, focal) {
     } else {
       suppressWarnings({
       forward <- cfdb %>%
-        filter(first == focal) %>%
+        filter(first %in% focal) %>%
         # Append abundance values of first and second genomes
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_first"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_firstX"), -1),
                   by=join_by(first==genome)) %>%
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_second"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_secondX"), -1),
                   by=join_by(second==genome)) %>%
         select(-reverse,-total) %>% 			# Drop reverse and total columns
         unnest(cols = forward) %>% 			# Expand metabolites
-        pivot_longer(cols = starts_with("sample"), 	# Pivot longer to create one column per sample
+        pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
                      names_to = c(".value", "sample"),
-                     names_sep = "_") %>%
+                     names_pattern = "(.+)_(firstX|secondX)",
+                     values_drop_na = TRUE) %>%
         # Calculate the ratio between donor and pool of receptors for each metabolite
         group_by(first,forward) %>%
-        summarise(across(where(is.double), ~max(.x[sample == "first"]) / sum(.x[sample == "second"])), .groups = "drop") %>%
+        #summarise(across(where(is.double), ~max(.x[sample == "firstX"]) / sum(.x[sample == "secondX"])), .groups = "drop") %>% #without topping
+        summarise(across(where(is.double), ~ pmin(1, max(.x[sample == "firstX"]) / sum(.x[sample == "secondX"]))), .groups = "drop") %>%
         # Calculate the donor potential per genome
         group_by(first) %>%
         summarise(across(where(is.double), sum)) %>%
         rename(genome=1)
 
       reverse <- cfdb %>%
-        filter(second == focal) %>%
+        filter(second %in% focal) %>%
         # Append abundance values of first and second genomes
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_first"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_firstX"), -1),
                   by=join_by(first==genome)) %>%
-        left_join(genome_abundances %>%
-                    rename_with(~ paste0(., "_second"), -1),
+        left_join(abundance %>%
+                    rename_with(~ paste0(., "_secondX"), -1),
                   by=join_by(second==genome)) %>%
         select(-forward,-total) %>% 			# Drop reverse and total columns
         unnest(cols = reverse) %>% 			# Expand metabolites
-        pivot_longer(cols = starts_with("sample"), 	# Pivot longer to create one column per sample
+        pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
                      names_to = c(".value", "sample"),
-                     names_sep = "_") %>%
+                     names_pattern = "(.+)_(firstX|secondX)",
+                     values_drop_na = TRUE) %>%
         # Calculate the ratio between donor and pool of receptors for each metabolite
         group_by(second, reverse) %>%
-        summarise(across(where(is.double), ~max(.x[sample == "second"]) / sum(.x[sample == "first"])), .groups = "drop") %>%
+        #summarise(across(where(is.double), ~max(.x[sample == "secondX"]) / sum(.x[sample == "firstX"])), .groups = "drop") %>% #without topping
+        summarise(across(where(is.double), ~ pmin(1, max(.x[sample == "secondX"]) / sum(.x[sample == "firstX"]))), .groups = "drop") %>%
         # Calculate the donor potential per genome
         group_by(second) %>%
         summarise(across(where(is.double), sum)) %>%

@@ -25,7 +25,7 @@ MetaDEEP only has three strict dependencies:
 Basic usage of MetaDEEP package
 
 ### Load a single SBML (sbml2rdb)
-Load and convert a SBML file into MetaDEEP reaction database (rdb). The resulting object is a tibble containing character lists of reactants and products of each reaction.
+Load and convert a SBML file into MetaDEEP reaction database (rdb). The resulting object is a tibble containing character lists of reactants and products of each reaction. 
 
 ```r
 # Read SBML directly into MetaDEEP reaction database (rdb)
@@ -58,7 +58,7 @@ genome1_rdb %>%
 | R_RXN__45__18707 | M_TusA__45__L__45__cysteine_c                       | M_TusA__45__Persulfides_c                    |
 
 ### Load multiple SBML (sbmls2rdb)
-Convert multiple SBML files into a list of MetaDEEP reaction databases (rdb). The resulting object is a list of tibbles containing character lists of reactants and products of each reaction.
+Convert multiple SBML files into a list of MetaDEEP reaction databases (rdb). The resulting object is a list of tibbles containing character lists of reactants and products of each reaction. This step might take a few minutes (if working with hundreds of genomes) or even a few hours (if working with thousands of genomes) to accomplish. The resulting rdbs object can be considerably large (several GBs if working with thousands of genomes), which might require large memory allocation.
 
 ```r
 sbml_files <- list.files(path = "data", pattern = "\\.sbml$", full.names = TRUE)
@@ -294,24 +294,24 @@ allgenomes_donor <- donor(allgenomes_cfdb, abundance=genome_abundances)
 
 | genome  | sample1 | sample2 | sample3 |
 |---------|---------|---------|---------|
-| genome1 |     4   |    13   |   68    |
-| genome2 |   7.5   |    27   |    6.56 |
-| genome3 |     7   |   4.75  |    6.06 |
-| genome4 |   8.5   |    3.7  |    5.73 |
+| genome1 |    4    |    4    |    4    |
+| genome2 |   7.5   |    8    |   6.56  |
+| genome3 |    7    |   4.75  |   6.06  |
+| genome4 |   8.5   |   3.7   |   5.73  |
 
-Note how in sample1, in which relative abundances of all bacteria are even, the donor potential is similar to the potential calculated without considering relative abundances. In the case of genome1 and genome3 the value is identical, because they only have one donor per metabolite. In the case of genome2 and genome4 the value is lower because they have multiple providers for some metabolites, which reduces their capacity to fully exchange metabolites
+Note how in sample1, in which relative abundances of all bacteria are even, the donor potential is similar to the potential calculated without considering relative abundances. In the case of genome1 and genome3 the value is identical, because they only have one receptor per metabolite. In the case of genome2 and genome4 the value is lower because they have multiple receptors for some metabolites, which reduces their capacity to fully exchange metabolites.
 
-The values in sample2 and sample3 are very different to the baseline donor potential, because relative abundances are very uneven. The bacteria with high relative abundances (genome1 and genome2 in sample2; genome1 in sample3) have a much higher capacity to provide metabolites to other bacteria, because they are much more abundant.
+The values in sample2 and sample3 are more different to the baseline donor potential, because relative abundances are very uneven. The bacteria with high relative abundances (genome1 and genome2 in sample2; genome1 in sample3) have a higher capacity to provide metabolites to other bacteria, because they are more abundant.
 
 It is also possible to focus on a single genome using the ***focus*** argument. This is mainly useful when working with large quantities of genomes, to speed up computation.
 
 ```r
-genome1_donor <- donor(allgenomes_cfdb, abundance=genome_abundances, focal="genome1")
+genome1_donor <- donor(allgenomes_cfdb, abundance=genome_abundances, focal="genome2")
 ```
 
 | genome  | sample1 | sample2 | sample3 |
 |---------|---------|---------|---------|
-| genome1 |       4 |      13 |      68 |
+| genome2 |     7.5 |       8 |    6.56 |
 
 #### Receptor potential (receptor)
 
@@ -321,12 +321,12 @@ allgenomes_receptor <- receptor(allgenomes_cfdb, abundance=genome_abundances)
 
 | genome  | sample1 | sample2 | sample3 |
 |---------|---------|---------|---------|
-| genome1 |     6   |    2.25 |   0.353 |
-| genome2 |     9   |    3    |  25     |
-| genome3 |     7   |   19    |  39     |
-| genome4 |    11   |   32    |  27     |
+| genome1 |       6 |    2.25 |   0.353 |
+| genome2 |       8 |       3 |       8 |
+| genome3 |       7 |       7 |       7 |
+| genome4 |       9 |       9 |       9 |
 
 
-Note how in sample1, in which relative abundances of all bacteria are even, the receptor potential is similar to the potential calculated without considering relative abundances. In the case of genome1 and genome3 the value is identical, because they only have one receptor per metabolite. In the case of genome2 and genome4 the value is higher because they have multiple receptors for some metabolites, which increases their capacity to receive metabolites.
+Note how in sample1, in which relative abundances of all bacteria are even, the receptor potential is similar to the potential calculated without considering relative abundances. In the case of genome1 and genome3 the value is identical, because they only have one donor per metabolite. In the case of genome2 and genome4 the value is higher because they have multiple donors for some metabolites, which increases their capacity to receive metabolites.
 
-The values in sample2 and sample3 are very different to the baseline donor potential, because relative abundances are very uneven. The bacteria with high relative abundances (genome1 and genome2 in sample2; genome1 in sample3) have a much lower capacity to receive metabolites from other bacteria, because donor are much less abundant.
+The values in sample2 and sample3 are rather different to the baseline receptor potential, because relative abundances are very uneven. The bacteria with high relative abundances (genome1 and genome2 in sample2; genome1 in sample3) have a much lower capacity to receive metabolites from other bacteria, because donors are much less abundant.
