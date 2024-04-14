@@ -279,6 +279,13 @@ genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"
         sample3=c(0.85,0.05,0.05,0.05))
 ```
 
+| genome  | sample1 | sample2 | sample3 |
+|---------|---------|---------|---------|
+| genome1 |   0.25  |   0.4   |   0.85  |
+| genome2 |   0.25  |   0.4   |   0.05  |
+| genome3 |   0.25  |   0.1   |   0.05  |
+| genome4 |   0.25  |   0.1   |   0.05  |
+
 #### Donor potential (donor)
 
 ```r
@@ -292,6 +299,10 @@ allgenomes_donor <- donor(allgenomes_cfdb, abundance=genome_abundances)
 | genome3 |     7   |   4.75  |    6.06 |
 | genome4 |   8.5   |    3.7  |    5.73 |
 
+Note how in sample1, in which relative abundances of all bacteria are even, the donor potential is similar to the potential calculated without considering relative abundances. In the case of genome1 and genome3 the value is identical, because they only have one donor per metabolite. In the case of genome2 and genome4 the value is lower because they have multiple providers for some metabolites, which reduces their capacity to fully exchange metabolites
+
+The values in sample2 and sample3 are very different to the baseline donor potential, because relative abundances are very uneven. The bacteria with high relative abundances (genome1 and genome2 in sample2; genome1 in sample3) have a much higher capacity to provide metabolites to other bacteria, because they are much more abundant.
+
 #### Receptor potential (receptor)
 
 ```r
@@ -304,3 +315,8 @@ allgenomes_receptor <- receptor(allgenomes_cfdb, abundance=genome_abundances)
 | genome2 |     9   |    3    |  25     |
 | genome3 |     7   |   19    |  39     |
 | genome4 |    11   |   32    |  27     |
+
+
+Note how in sample1, in which relative abundances of all bacteria are even, the receptor potential is similar to the potential calculated without considering relative abundances. In the case of genome1 and genome3 the value is identical, because they only have one receptor per metabolite. In the case of genome2 and genome4 the value is higher because they have multiple receptors for some metabolites, which increases their capacity to receive metabolites.
+
+The values in sample2 and sample3 are very different to the baseline donor potential, because relative abundances are very uneven. The bacteria with high relative abundances (genome1 and genome2 in sample2; genome1 in sample3) have a much lower capacity to receive metabolites from other bacteria, because donor are much less abundant.
