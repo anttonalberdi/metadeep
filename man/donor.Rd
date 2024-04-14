@@ -4,10 +4,12 @@
 \alias{donor}
 \title{Calculation of donor potential}
 \usage{
-donor(cfdb, mode = "total")
+donor(cfdb, abundance)
 }
 \arguments{
 \item{cfdb}{A cross-feeding database (cfdb) generated using mdb2cfdb()}
+
+\item{abundance}{A data frame containing relative abundance data of bacteria}
 }
 \description{
 Calculation of donor potential of each genome

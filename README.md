@@ -234,7 +234,9 @@ plot(allgenomes_exchange_igraph_total,
 
 ![Metabolite exchange networks](figures/exchange_networks.png)
 
-### Calculate donor and receptor potential
+### Calculate donor and receptor potential (without abundances)
+
+These calculations overlook relative abundances of bacteria, and only capture the theoretical capacity of metabolite exchange within the community.
 
 #### Donor potential (donor)
 
@@ -265,3 +267,40 @@ allgenomes_receptor <- receptor(allgenomes_cfdb)
 | genome2 | <chr [8]>   |        3 |             8 |
 | genome3 | <chr [7]>   |        3 |             7 |
 | genome4 | <chr [9]>   |        3 |             9 |
+
+### Calculate donor and receptor potential (with abundances)
+
+The relative abundances of microorganisms often vary drastically within a community. Therefore it is unlikely that a bacterium with 0.00001 relative abundance will provide a bacterium with 0.9 relative abundance with metabolites. Therefore, if relative abundance data is provided, donor() and receptor() functions calculate metabolites exchanges considering the representation of bacteria.
+
+```r
+genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"),
+        sample1=c(0.25,0.25,0.25,0.25),
+        sample2=c(0.40,0.40,0.10,0.10),
+        sample3=c(0.85,0.05,0.05,0.05))
+```
+
+#### Donor potential (donor)
+
+```r
+allgenomes_donor <- donor(allgenomes_cfdb, abundance=genome_abundances)
+```
+
+| genome  | sample1 | sample2 | sample3 |
+|---------|---------|---------|---------|
+| genome1 |     4   |    13   |   68    |
+| genome2 |   7.5   |    27   |    6.56 |
+| genome3 |     7   |   4.75  |    6.06 |
+| genome4 |   8.5   |    3.7  |    5.73 |
+
+#### Receptor potential (receptor)
+
+```r
+allgenomes_receptor <- receptor(allgenomes_cfdb, abundance=genome_abundances)
+```
+
+| genome  | sample1 | sample2 | sample3 |
+|---------|---------|---------|---------|
+| genome1 |     6   |    2.25 |   0.353 |
+| genome2 |     9   |    3    |  25     |
+| genome3 |     7   |   19    |  39     |
+| genome4 |    11   |   32    |  27     |
