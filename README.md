@@ -1,6 +1,6 @@
 # MetaDEEP
 
-MetaDEEP, the **Meta**bolic **D**ependence and **E**xchange **E**valuation **P**latform, is an R package to analyse metabolic dependence and exchange metrics from genome-scale metabolic networks (GSMN).
+MetaDEEP, the **Meta**bolic **D**ependence and **E**xchange **E**valuation **P**ackage, is an R package to analyse metabolic dependence and exchange metrics from genome-scale metabolic networks (GSMN).
 
 ## Installation
 
@@ -48,8 +48,8 @@ It is possible to visualise the metabolites involved in each reaction.
 
 ```r
 genome1_rdb %>% 
-    filter(reaction == "R_RXN__45__18707") 
-    %>% unnest()
+    filter(reaction == "R_RXN__45__18707") %>% 
+    unnest()
 ```
 
 | reaction         | reactants                                           | products                                      |
@@ -201,6 +201,71 @@ allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
 | genome2 | NA      | NA      | 2       | 6       |
 | genome3 | NA      | NA      | NA      | 3       |
 | genome4 | NA      | NA      | NA      | NA      |
+
+#### Relative abundance-normalised exchange
+
+The relative abundances of microorganisms within a community can vary significantly. Consequently, it's improbable that a bacterium with a relative abundance of 0.00001 will sufficiently supply metabolites to one with 0.9 relative abundance. To address this, when relative abundance data is available, the cfdb2pair() functions compute pairwise metabolite exchanges, taking into account the representation of bacteria. The output is a list containing a matrix for each sample, detailing these interactions.
+
+```r
+genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"),
+        sample1=c(0.25,0.25,0.25,0.25),
+        sample2=c(0.40,0.40,0.10,0.10),
+        sample3=c(0.85,0.05,0.05,0.05))
+```
+
+```r
+allgenomes_exchange_abun_total <- cfdb2pair(allgenomes_cfdb, mode="total", abundance=genome_abundances)
+```
+
+**Sample 1**
+|        | genome1 | genome2 | genome3 | genome4 |
+|--------|---------|---------|---------|---------|
+| genome1|   NA    |    2    |    3    |    5    |
+| genome2|   NA    |   NA    |    4    |   12    |
+| genome3|   NA    |   NA    |   NA    |    7    |
+| genome4|   NA    |   NA    |   NA    |   NA    |
+
+**Sample 2**
+|        | genome1 | genome2 | genome3 | genome4 |
+|--------|---------|---------|---------|---------|
+| genome1|   NA    |    2    |   2.25  |    2    |
+| genome2|   NA    |   NA    |   2.5   |   7.5   |
+| genome3|   NA    |   NA    |   NA    |    7    |
+| genome4|   NA    |   NA    |   NA    |   NA    |
+
+**Sample 3**
+|        | genome1 | genome2 | genome3 | genome4 |
+|--------|---------|---------|---------|---------|
+| genome1|   NA    | 1.0588  | 2.0588  | 1.2353  |
+| genome2|   NA    |   NA    |    4    |   12    |
+| genome3|   NA    |   NA    |   NA    |    7    |
+| genome4|   NA    |   NA    |   NA    |   NA    |
+
+### Summarise pairwise matrices 
+
+Pairwise matrices can be summarised into sample-specific metrics.
+
+#### Single matrix with no abundance data
+
+```r
+pair2summary(allgenomes_exchange_total)
+```
+
+| sum | median | mean | sd  |
+|-----|--------|------|-----|
+| 33  | 4.5    | 5.5  | 3.62|
+
+#### List of matrices derived from abundance data
+
+```r
+pair2summary(allgenomes_exchange_abun_total)
+```
+
+| sample  | sum  | median | mean | sd   |
+|---------|------|--------|------|------|
+| sample1 | 33.0 | 4.50   | 5.50 | 3.62 |
+| sample2 | 23.2 | 2.38   | 3.88 | 2.63 |
+| sample3 | 27.4 | 3.03   | 4.56 | 4.27 |
 
 ### Convert cross-feeding database to igraph network (cfdb2igraph)
 

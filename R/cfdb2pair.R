@@ -137,7 +137,7 @@ cfdb2pair <- function(cfdb, mode="total", abundance) {
     #Select result
     if(mode=="total"){
       pair <- total_list
-    }else if(mode=="total"){
+    }else if(mode=="forward"){
       pair <- forward_list
     }else{
       pair <- reverse_list
