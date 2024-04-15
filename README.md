@@ -21,6 +21,17 @@ MetaDEEP only has three strict dependencies:
 - [SBMLR](https://www.bioconductor.org/packages/release/bioc/html/SBMLR.html)
 - [igraph](https://igraph.org)
 
+## Typical worflow
+
+1. **sbml2rdb()** to load SBML files into a reaction database.
+2. **rdb2mdb()** to generate a metabolite database.
+3. **mdb2cfdb()** to generate a metabolite exchange database.
+4. **cfdb2pair()** to transform metabolite exchange databases into pairwise matrices.
+5. **pair2summary()** to calculate summary statistics of metabolite exchanges.
+6. **pair2igraph()** to transform pairwise matrices into igraph network objects.
+7. **donor()** to calculate genome-specific donor capacities.
+8. **receptor()** to calculate genome-specific receptor capacities.
+
 ## Usage
 Basic usage of MetaDEEP package
 
@@ -49,7 +60,7 @@ It is possible to visualise the metabolites involved in each reaction.
 ```r
 genome1_rdb %>% 
     filter(reaction == "R_RXN__45__18707") %>% 
-    unnest()
+    unnest(cols = c(reactants, products))
 ```
 
 | reaction         | reactants                                           | products                                      |
@@ -62,7 +73,7 @@ Convert multiple SBML files into a list of MetaDEEP reaction databases (rdb). Th
 
 ```r
 sbml_files <- list.files(path = "data", pattern = "\\.sbml$", full.names = TRUE)
-allgenomes_rdbs <- sbmls2rdbs(sbml_files)
+allgenomes_rdb <- sbml2rdb(sbml_files)
 ```
 
 $genome1
@@ -81,14 +92,14 @@ $genome2
 | R_RXN__45__22610                         | <chr [2]>    | <chr [2]>    |
 | R_RXN__45__15920                         | <chr [2]>    | <chr [3]>    |
 
-### Classify metabolite types (rdb2mdb and rdbs2mdb)
+### Classify metabolite types (rdb2mdb)
 Classify metabolites in a single-genome (rdb) or multi-genome (rdbs) reaction database into source, transit and sink metabolites stored in a metabolite database (mdb).
 
 - **Source metabolites:** those that the bacterium is able to use but not to produce.
 - **Transit metabolites:** those that the bacterium is able to use and produce.
 - **Sink metabolites:** those that the bacterium is able to produce but not to use.
 
-#### In a single genome (rdb2mdb)
+#### In a single genome
 
 ```r
 genome1_mdb <- rdb2mdb(genome1_rdb)
@@ -98,10 +109,10 @@ genome1_mdb <- rdb2mdb(genome1_rdb)
 |---------|------------|------------|------------|-----------|-------------|
 | genome1 | <chr [174]>| <chr [95]> | <chr [179]>| 267       | 448         |
 
-#### In multiple genomes (rdbs2mdb)
+#### In multiple genomes
 
 ```r
-allgenomes_mdb <- rdbs2mdb(allgenomes_rdbs)
+allgenomes_mdb <- rdb2mdb(allgenomes_rdb)
 ```
 
 | genome  | sources    | transits   | sinks      | reactions | metabolites |
@@ -162,7 +173,7 @@ allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb, mode="loose")
 Number of total metabolites genomes in columns and rows can exchange with each other.
 
 ```r
-allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb)
+allgenomes_pair_total <- cfdb2pair(allgenomes_cfdb)
 ```
 
 | genomes | genome1 | genome2 | genome3 | genome4 |
@@ -177,7 +188,7 @@ allgenomes_exchange_total <- cfdb2pair(allgenomes_cfdb)
 Number of metabolites genomes in rows can provide to genomes in columns.
 
 ```r
-allgenomes_exchange_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
+allgenomes_pair_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
 ```
 
 | genomes | genome1 | genome2 | genome3 | genome4 |
@@ -192,7 +203,7 @@ allgenomes_exchange_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
 Number of metabolites genomes in rows can acquire from genomes in columns.
 
 ```r
-allgenomes_exchange_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
+allgenomes_pair_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
 ```
 
 | genomes | genome1 | genome2 | genome3 | genome4 |
@@ -214,7 +225,7 @@ genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"
 ```
 
 ```r
-allgenomes_exchange_abun_total <- cfdb2pair(allgenomes_cfdb, mode="total", abundance=genome_abundances)
+allgenomes_pair_abun_total <- cfdb2pair(allgenomes_cfdb, mode="total", abundance=genome_abundances)
 ```
 
 **Sample 1**
@@ -248,7 +259,7 @@ Pairwise matrices can be summarised into sample-specific metrics.
 #### Single matrix with no abundance data
 
 ```r
-pair2summary(allgenomes_exchange_total)
+pair2summary(allgenomes_pair_total)
 ```
 
 | sum | median | mean | sd  |
@@ -258,7 +269,7 @@ pair2summary(allgenomes_exchange_total)
 #### List of matrices derived from abundance data
 
 ```r
-pair2summary(allgenomes_exchange_abun_total)
+pair2summary(allgenomes_pair_abun_total)
 ```
 
 | sample  | sum  | median | mean | sd   |
@@ -267,14 +278,16 @@ pair2summary(allgenomes_exchange_abun_total)
 | sample2 | 23.2 | 2.38   | 3.88 | 2.63 |
 | sample3 | 27.4 | 3.03   | 4.56 | 4.27 |
 
-### Convert cross-feeding database to igraph network (cfdb2igraph)
+### Convert pairwise matrices to igraph network (pair2igraph)
+
+#### Single matrices
 
 ```r
-allgenomes_exchange_igraph_total <- cfdb2igraph(allgenomes_cfdb)
+allgenomes_exchange_igraph_total <- pair2igraph(allgenomes_pair_total)
 
-allgenomes_exchange_igraph_forward <- cfdb2igraph(allgenomes_cfdb, mode="forward")
+allgenomes_exchange_igraph_forward <- pair2igraph(allgenomes_pair_forward, mode="forward")
 
-allgenomes_exchange_igraph_reverse <- cfdb2igraph(allgenomes_cfdb, mode="reverse")
+allgenomes_exchange_igraph_reverse <- pair2igraph(allgenomes_pair_reverse, mode="reverse")
 ```
 
 The networks can be visualised:
@@ -298,6 +311,37 @@ plot(allgenomes_exchange_igraph_total,
 ```
 
 ![Metabolite exchange networks](figures/exchange_networks.png)
+
+
+#### List of matrices
+
+If pairwise metabolite exchange matrices have been generated for multiple samples, pair2igraph() can also handle lists, outputting another list of igraph objects. 
+
+```r
+pair2igraph(allgenomes_pair_abun_total)
+```
+
+Resulting in:
+
+```
+$sample1
+IGRAPH af226c2 UNW- 4 6 -- 
++ attr: name (v/c), weight (e/n)
++ edges from af226c2 (vertex names):
+[1] genome1--genome2 genome1--genome3 genome1--genome4 genome2--genome3 genome2--genome4 genome3--genome4
+
+$sample2
+IGRAPH f83027f UNW- 4 6 -- 
++ attr: name (v/c), weight (e/n)
++ edges from f83027f (vertex names):
+[1] genome1--genome2 genome1--genome3 genome1--genome4 genome2--genome3 genome2--genome4 genome3--genome4
+
+$sample3
+IGRAPH cafa6e2 UNW- 4 6 -- 
++ attr: name (v/c), weight (e/n)
++ edges from cafa6e2 (vertex names):
+[1] genome1--genome2 genome1--genome3 genome1--genome4 genome2--genome3 genome2--genome4 genome3--genome4
+```
 
 ### Calculate donor and receptor potential (without abundances)
 

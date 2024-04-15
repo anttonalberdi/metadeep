@@ -7,7 +7,7 @@
 rdb2mdb(rdb)
 }
 \arguments{
-\item{rdb}{An rdb object produced by sbml2rdb().}
+\item{rdb}{An rdb or rdbs object produced by sbml2rdb().}
 }
 \description{
 Classification of metabolites in a single genome into source, transit and sink metabolites

@@ -13,24 +13,30 @@
 #' @export
 
 sbml2rdb <- function(sbml) {
-  # Input check
-  if (class(sbml) == "SBMLR") {
+
+  sbml2rdb_func <- function(sbml){
     reactions <- sbml$reactions
-  } else if (is.character(sbml) && file.exists(sbml)) {
-    reactions <- readSBML(sbml)$reactions
-  } else {
-    stop("Input is neither an SBMLR object nor a valid file.")
+    rdb <- tibble(
+      reaction = sapply(reactions, function(x) x$id),
+      reactants = lapply(reactions, function(x) x$reactants),
+      products = lapply(reactions, function(x) x$products)
+    )
+    return(rdb)
   }
 
-  #Convert sbml to reaction database
-  rdb <- tibble(
-    reaction = sapply(reactions, function(x) x$id),
-    reactants = lapply(reactions, function(x) x$reactants),
-    products = lapply(reactions, function(x) x$products)
-  )
-
-  #Add class
-  class(rdb) <- c("rdb", class(rdb))
+  # Input check
+  if (class(sbml) == "SBMLR") {
+    rdb <- sbml2rdb_func(sbml)
+  } else if (is.vector(sbml) && all(is.character(sbml)) && all(file.exists(sbml))) {
+    sbml2 <- lapply(sbml, readSBML)
+    rdb <- lapply(sbml2, sbml2rdb_func)
+    names(rdb) <- gsub(".*/([^/]+)\\.sbml", "\\1", sbml)
+  } else if (is.character(sbml) && file.exists(sbml)) {
+    sbml <- readSBML(sbml)
+    rdb <- sbml2rdb_func(sbml)
+  } else {
+    stop("Input is neither an SBMLR object nor, a vector of SBML files, or a validSBML file.")
+  }
 
   # Output reaction database
   return(rdb)
