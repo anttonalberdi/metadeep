@@ -6,6 +6,7 @@
 #' @param exdb A exchange database (exdb) generated using mdb2exdb()
 #' @param abundance An optional data frame containing relative abundance data of bacteria
 #' @param focal An optional focal genome name or vector of genome names to calculate receptor potential
+#' @param verbosity Whether to print the progress of the computation when using abundance data. Default=TRUE
 #' @import tidyverse
 #' @examples
 #' receptor(allgenomes_exdb)
@@ -16,7 +17,8 @@
 #' Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110
 #' @export
 
-receptor <- function(exdb, abundance, focal) {
+receptor <- function(exdb, abundance, focal, verbosity=TRUE) {
+
   # Input check
   if (inherits(exdb, "exdb")) {
     exdb <- exdb
@@ -24,45 +26,35 @@ receptor <- function(exdb, abundance, focal) {
     stop("Input is not a valid exdb object created by mdb2exdb().")
   }
 
+  #If focal genomes are not provided, then select all genomes in exdb
+  if(missing(focal)){focal=c(exdb$first,exdb$second) %>% unique() %>% sort()}
+
   # If no abundance data is provided
   if(missing(abundance)){
-    if(missing(focal)){
-      forward <- exdb %>%
-        filter(length(reverse) > 0) %>%
-        group_by(first) %>%
-        summarize(metabolites = list(unique(unlist(reverse))), donors_n=n()) %>%
-        mutate(metabolites_n = map_int(metabolites, length)) %>%
-        rename(genome=1)
 
-      reverse <- exdb %>%
-        filter(length(forward) > 0) %>%
-        group_by(second) %>%
-        summarize(metabolites = list(unique(unlist(forward))), donors_n=n()) %>%
-        mutate(metabolites_n = map_int(metabolites, length)) %>%
-        rename(genome=1)
-    } else {
-      forward <- exdb %>%
-        filter(length(reverse) > 0) %>%
+    #Metabolites each genome in column first can receive from the rest of genomes in column second
+      seconds2first <- exdb %>%
+        filter(length(reverse) > 0) %>% # remove pairings with no exchange of metabolites
         filter(first %in% focal) %>%
         group_by(first) %>%
         summarize(metabolites = list(unique(unlist(reverse))), donors_n=n()) %>%
         mutate(metabolites_n = map_int(metabolites, length)) %>%
         rename(genome=1)
 
-      reverse <- exdb %>%
-        filter(length(forward) > 0) %>%
+      #Metabolites each genome in column second can receive from the rest of genomes in column first
+      firsts2second <- exdb %>%
+        filter(length(forward) > 0) %>% # remove pairings with no exchange of metabolites
         filter(second %in% focal) %>%
         group_by(second) %>%
         summarize(metabolites = list(unique(unlist(forward))), donors_n=n()) %>%
         mutate(metabolites_n = map_int(metabolites, length)) %>%
         rename(genome=1)
-    }
 
-    receptor_potential <- bind_rows(forward,reverse) %>%
-      rowwise() %>%
-      group_by(genome) %>%
-      summarize(metabolites = list(unique(unlist(metabolites))), donors_n=sum(donors_n)) %>%
-      mutate(metabolites_n = map_int(metabolites, length))
+      receptor_potential <- bind_rows(seconds2first,firsts2second) %>%
+        rowwise() %>%
+        group_by(genome) %>%
+        summarize(metabolites = list(unique(unlist(metabolites))), donors_n=sum(donors_n)) %>%
+        mutate(metabolites_n = map_int(metabolites, length))
   }
 
   # If abundance data is provided
@@ -72,88 +64,60 @@ receptor <- function(exdb, abundance, focal) {
     abundance <- abundance %>%
       mutate(across(where(is.double), ~ ./sum(.)))
 
-    if(missing(focal)){
-      suppressWarnings({
-        forward <- exdb %>%
-          # Append abundance values of first and second genomes
-          left_join(abundance %>%
-                      rename_with(~ paste0(., "_firstX"), -1),
-                    by=join_by(first==genome)) %>%
-          left_join(abundance %>%
-                      rename_with(~ paste0(., "_secondX"), -1),
-                    by=join_by(second==genome)) %>%
-          select(-forward,-total) %>% 			# Drop reverse and total columns
-          unnest(cols = reverse) %>% 			# Expand metabolites
-          pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
-                       names_to = c(".value", "sample"),
-                       names_pattern = "(.+)_(firstX|secondX)",
-                       values_drop_na = TRUE) %>%
-          rename(metabolite=3)
+    #Identify samples
+    samples <- names(abundance)[2:length(names(abundance))]
 
-        reverse <- exdb %>%
-          # Append abundance values of first and second genomes
-          left_join(abundance %>%
-                      rename_with(~ paste0(., "_secondX"), -1),
-                    by=join_by(first==genome)) %>%
-          left_join(abundance %>%
-                      rename_with(~ paste0(., "_firstX"), -1),
-                    by=join_by(second==genome)) %>%
-          select(-reverse,-total) %>% 			# Drop reverse and total columns
-          unnest(cols = forward) %>% 			# Expand metabolites
-          pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
-                       names_to = c(".value", "sample"),
-                       names_pattern = "(.+)_(firstX|secondX)",
-                       values_drop_na = TRUE) %>%
-          rename(first=second,second=first,metabolite=3)
-      })
-    } else {
-      suppressWarnings({
-      forward <- exdb %>%
-        filter(first %in% focal) %>%
-        # Append abundance values of first and second genomes
-        left_join(abundance %>%
-                    rename_with(~ paste0(., "_firstX"), -1),
+    #Per-sample loop is used, because in real datasets multi-sample calculations become too memory-exhaustive
+    receptor_potential <- tibble(genome=focal)
+    n=0
+    for (sample in samples){
+      n=n+1
+      if(verbosity==TRUE){message(paste0("Processing ",sample," (",n,"/",length(samples),")"))}
+
+      #Filter by focal taxa and append abundances to exdb
+      exdb_abun <- exdb %>%
+        filter(first %in% focal, second %in% focal) %>%
+        left_join(abundance %>% select(genome,{{ sample }}) %>% rename(abun_first=2),
                   by=join_by(first==genome)) %>%
-        left_join(abundance %>%
-                    rename_with(~ paste0(., "_secondX"), -1),
-                  by=join_by(second==genome)) %>%
+        left_join(abundance %>% select(genome,{{ sample }}) %>% rename(abun_second=2),
+                  by=join_by(second==genome))
+
+      #Effective number of metabolites each genome in column first can receive from the rest of genomes in column second
+      seconds2first <- exdb_abun %>%
         select(-forward,-total) %>% 			# Drop reverse and total columns
+        rename(abun_donor=abun_second,abun_receptor=abun_first) %>% #Rename abundances of first/second to donor/receptor
         unnest(cols = reverse) %>% 			# Expand metabolites
-        pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
-                     names_to = c(".value", "sample"),
-                     names_pattern = "(.+)_(firstX|secondX)",
+        pivot_longer(cols = contains(c("abun_donor", "abun_receptor")), 	# Pivot longer to create one column per sample
+                     names_to = c(".value", "genome"),
+                     names_pattern = "(.+)_(donor|receptor)",
                      values_drop_na = TRUE) %>%
-        rename(metabolite=3)
+        rename(donor=second,receptor=first,metabolite=3)
 
-      reverse <- exdb %>%
-        filter(second %in% focal) %>%
-        # Append abundance values of first and second genomes
-        left_join(abundance %>%
-                    rename_with(~ paste0(., "_secondX"), -1),
-                  by=join_by(first==genome)) %>%
-        left_join(abundance %>%
-                    rename_with(~ paste0(., "_firstX"), -1),
-                  by=join_by(second==genome)) %>%
+      #Effective number of metabolites each genome in column second can receive from the rest of genomes in column first
+      firsts2second <- exdb_abun %>%
         select(-reverse,-total) %>% 			# Drop reverse and total columns
+        rename(abun_receptor=abun_second,abun_donor=abun_first) %>% #Rename abundances of first/second to receptor/donor
         unnest(cols = forward) %>% 			# Expand metabolites
-        pivot_longer(cols = contains(c("firstX", "secondX")), 	# Pivot longer to create one column per sample
-                     names_to = c(".value", "sample"),
-                     names_pattern = "(.+)_(firstX|secondX)",
+        pivot_longer(cols = contains(c("abun_donor", "abun_receptor")), 	# Pivot longer to create one column per sample
+                     names_to = c(".value", "genome"),
+                     names_pattern = "(.+)_(donor|receptor)",
                      values_drop_na = TRUE) %>%
-        rename(first=second,second=first,metabolite=3)
-      })
-    }
+        rename(donor=first,receptor=second,metabolite=3)
 
-    #Merge tables and calculate metabolite exchanges
-    receptor_potential <- bind_rows(forward,reverse) %>%
-      group_by(first,metabolite) %>%
-      #summarise(across(where(is.double), ~sum(.x[sample == "secondX"]) / max(.x[sample == "firstX"]))) %>% #without topping
-      summarise(across(where(is.double), ~ pmin(1, sum(.x[sample == "secondX"]) / max(.x[sample == "firstX"]))), .groups = "drop") %>%
-      mutate_if(is.double, ~ifelse(is.nan(.), 0, .)) %>% #convert NaNs derived from n/0 to 0
-      rename(genome=1) %>%
-      rowwise() %>%
-      group_by(genome) %>%
-      summarise(across(where(is.double), sum))
+      #Merge tables and calculate metabolite exchanges
+      receptor_potential_sample <- bind_rows(seconds2first,firsts2second) %>%
+        group_by(receptor,metabolite) %>%
+        summarise(potential = pmin(1, sum(abun[genome == "donor"]) / max(abun[genome == "receptor"]))) %>%
+        mutate(potential = if_else(is.na(potential), 0, potential)) %>% #convert NaNs derived from n/0 to 0
+        rename(genome=1) %>%
+        rowwise() %>%
+        group_by(genome) %>%
+        summarise(exchange=sum(potential), .groups = "drop")
+
+      #Append sample to table
+      receptor_potential <- receptor_potential %>% mutate(!!sample :=receptor_potential_sample$exchange)
+
+      }
   }
 
   #Output receptor potential table

@@ -4,7 +4,7 @@
 \alias{donor}
 \title{Calculation of donor potential}
 \usage{
-donor(exdb, abundance, focal)
+donor(exdb, abundance, focal, verbosity = TRUE)
 }
 \arguments{
 \item{exdb}{A exchange database (exdb) generated using mdb2exdb()}
@@ -12,6 +12,8 @@ donor(exdb, abundance, focal)
 \item{abundance}{An optional data frame containing relative abundance data of bacteria}
 
 \item{focal}{An optional focal genome name or vector of genome names to calculate donor potential}
+
+\item{verbosity}{Whether to print the progress of the computation when using abundance data. Default=TRUE}
 }
 \description{
 Calculation of donor potential of each genome
