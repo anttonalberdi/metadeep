@@ -1,18 +1,18 @@
-#' Generate crossfeeding database
-#' @title Generate crossfeeding database from a multi-genome metabolite database (mdb)
+#' Generate exchange database
+#' @title Generate exchange database from a multi-genome metabolite database (mdb)
 #' @author Antton Alberdi, \email{anttonalberdi@gmail.com}
 #' @keywords SBML tibble reaction reactant product
-#' @description Generate crossfeeding database from a multi-genome metabolite database (mdb)
+#' @description Generate exchange database from a multi-genome metabolite database (mdb)
 #' @param mdb A metabolite database (mdb) produced by rdb2mdb or rdbs2mdb
 #' @param mode Whether to calculate strict or loose metabolite exchange capacities. Default is mode="strict".
 #' @import tidyverse
 #' @examples
-#' mdb2cfdb(allgenomes_mdb)
+#' mdb2exdb(allgenomes_mdb)
 #' @references
 #' Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110
 #' @export
 
-mdb2cfdb <- function(mdb, mode="strict") {
+mdb2exdb <- function(mdb, mode="strict") {
   # Input check
   if (inherits(mdb, "mdb")) {
     mdb <- mdb
@@ -26,7 +26,7 @@ mdb2cfdb <- function(mdb, mode="strict") {
 
   #Calculate strict cross-feeding
   if(mode == "strict"){
-    cfdb <- combn(mdb$genome, 2, simplify = TRUE) %>%
+    exdb <- combn(mdb$genome, 2, simplify = TRUE) %>%
       t() %>%
       as.data.frame() %>%
       tibble %>%
@@ -39,7 +39,7 @@ mdb2cfdb <- function(mdb, mode="strict") {
 
   #Calculate loose cross-feeding
   if(mode == "loose"){
-    cfdb <- combn(mdb$genome, 2, simplify = TRUE) %>%
+    exdb <- combn(mdb$genome, 2, simplify = TRUE) %>%
       t() %>%
       as.data.frame() %>%
       tibble %>%
@@ -51,8 +51,8 @@ mdb2cfdb <- function(mdb, mode="strict") {
   }
 
   #Add class
-  class(cfdb) <- c("cfdb", class(cfdb))
+  class(exdb) <- c("exdb", class(exdb))
 
   #Output cross-feeding database
-  return(cfdb)
+  return(exdb)
 }

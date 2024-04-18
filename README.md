@@ -25,8 +25,8 @@ MetaDEEP only has three strict dependencies:
 
 1. **sbml2rdb()** to load SBML files into a reaction database.
 2. **rdb2mdb()** to generate a metabolite database.
-3. **mdb2cfdb()** to generate a metabolite exchange database.
-4. **cfdb2pair()** to transform metabolite exchange databases into pairwise matrices.
+3. **mdb2exdb()** to generate a metabolite exchange database.
+4. **exdb2pair()** to transform metabolite exchange databases into pairwise matrices.
 5. **pair2summary()** to calculate summary statistics of metabolite exchanges.
 6. **pair2igraph()** to transform pairwise matrices into igraph network objects.
 7. **donor()** to calculate genome-specific donor capacities.
@@ -68,7 +68,7 @@ genome1_rdb %>%
 | R_RXN__45__18707 | M_L__45__Cysteine__45__Desulfurase__45__persulfide_c | M_Cysteine__45__Desulfurase__45__L__45__cystei… |
 | R_RXN__45__18707 | M_TusA__45__L__45__cysteine_c                       | M_TusA__45__Persulfides_c                    |
 
-### Load multiple SBML (sbmls2rdb)
+### Load multiple SBML (sbml2rdb)
 Convert multiple SBML files into a list of MetaDEEP reaction databases (rdb). The resulting object is a list of tibbles containing character lists of reactants and products of each reaction. This step might take a few minutes (if working with hundreds of genomes) or even a few hours (if working with thousands of genomes) to accomplish. The resulting rdbs object can be considerably large (several GBs if working with thousands of genomes), which might require large memory allocation.
 
 ```r
@@ -122,7 +122,7 @@ allgenomes_mdb <- rdb2mdb(allgenomes_rdb)
 | genome3 | <chr [233]>| <chr [159]>| <chr [245]>| 395       | 637         |
 | genome4 | <chr [262]>| <chr [196]>| <chr [282]>| 508       | 740         |
 
-### Calculate cross-feeding potential (mdb2cfdb)
+### Calculate metabolite exchange potential (mdb2exdb)
 
 Calculate the capacity of each genome to provide or receive metabolites to/from other genomes. The resulting object is a tibble containing all pairwise combinations of genomes and their bi-directional as well as overall metabolite exchange capacities.
 
@@ -134,7 +134,7 @@ In strict mode (default) only source and sink metabolites are considered for cro
 - **Reverse:** sink metabolites of ***second*** that are source for ***first***
 
 ```r
-allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb)
+allgenomes_exdb <- mdb2exdb(allgenomes_mdb)
 ```
 
 |  first   | second  | forward   | reverse   | total     |
@@ -154,7 +154,7 @@ In loose mode source, transit and sink metabolites are considered for cross-feed
 - **Reverse:** transit and sink metabolites of ***second*** that are source for ***first***
 
 ```r
-allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb, mode="loose")
+allgenomes_exdb <- mdb2exdb(allgenomes_mdb, mode="loose")
 ```
 
 |  first   | second  | forward    | reverse    | total      |
@@ -173,7 +173,7 @@ allgenomes_cfdb <- mdb2cfdb(allgenomes_mdb, mode="loose")
 Number of total metabolites genomes in columns and rows can exchange with each other.
 
 ```r
-allgenomes_pair_total <- cfdb2pair(allgenomes_cfdb)
+allgenomes_pair_total <- exdb2pair(allgenomes_exdb, exchange="total")
 ```
 
 | genomes | genome1 | genome2 | genome3 | genome4 |
@@ -188,7 +188,7 @@ allgenomes_pair_total <- cfdb2pair(allgenomes_cfdb)
 Number of metabolites genomes in rows can provide to genomes in columns.
 
 ```r
-allgenomes_pair_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
+allgenomes_pair_forward <- exdb2pair(allgenomes_exdb, exchange="forward")
 ```
 
 | genomes | genome1 | genome2 | genome3 | genome4 |
@@ -203,7 +203,7 @@ allgenomes_pair_forward <- cfdb2pair(allgenomes_cfdb, mode="forward")
 Number of metabolites genomes in rows can acquire from genomes in columns.
 
 ```r
-allgenomes_pair_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
+allgenomes_pair_reverse <- exdb2pair(allgenomes_exdb, exchange="reverse")
 ```
 
 | genomes | genome1 | genome2 | genome3 | genome4 |
@@ -215,7 +215,7 @@ allgenomes_pair_reverse <- cfdb2pair(allgenomes_cfdb, mode="reverse")
 
 #### Relative abundance-normalised exchange
 
-The relative abundances of microorganisms within a community can vary significantly. Consequently, it's improbable that a bacterium with a relative abundance of 0.00001 will sufficiently supply metabolites to one with 0.9 relative abundance. To address this, when relative abundance data is available, the cfdb2pair() functions compute pairwise metabolite exchanges, taking into account the representation of bacteria. The output is a list containing a matrix for each sample, detailing these interactions.
+The relative abundances of microorganisms within a community can vary significantly. Consequently, it's improbable that a bacterium with a relative abundance of 0.00001 will sufficiently supply metabolites to one with 0.9 relative abundance. To address this, when relative abundance data is available, the exdb2pair() functions compute pairwise metabolite exchanges, taking into account the representation of bacteria. The output is a list containing a matrix for each sample, detailing these interactions.
 
 ```r
 genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"),
@@ -225,7 +225,7 @@ genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"
 ```
 
 ```r
-allgenomes_pair_abun_total <- cfdb2pair(allgenomes_cfdb, mode="total", abundance=genome_abundances)
+allgenomes_pair_abun_total <- exdb2pair(allgenomes_exdb, exchange="total", abundance=genome_abundances)
 ```
 
 **Sample 1**
@@ -251,6 +251,19 @@ allgenomes_pair_abun_total <- cfdb2pair(allgenomes_cfdb, mode="total", abundance
 | genome2|   NA    |   NA    |    4    |   12    |
 | genome3|   NA    |   NA    |   NA    |    7    |
 | genome4|   NA    |   NA    |   NA    |   NA    |
+
+If no exchange mode is defined, all three "forward", "reverse" and "total" exchanges are outputted. It is also possible to only select two of the modes with ***exchange=c("forward","reverse")***, for example.
+
+```r
+allgenomes_pair_abun_total <- exdb2pair(allgenomes_exdb, abundance=genome_abundances)
+```
+
+To fetch one of the exchange types from the nested list, one can make use of the map() and pluck() functions of ***purrr*** package.
+
+```r
+#Only list the forward matrices
+map(allgenomes_pair_abun_total, pluck, "forward")
+```
 
 ### Summarise pairwise matrices 
 
@@ -352,7 +365,7 @@ These calculations overlook relative abundances of bacteria, and only capture th
 Capacity of each bacterium to provide other bacteria with metabolites.
 
 ```r
-allgenomes_donor <- donor(allgenomes_cfdb)
+allgenomes_donor <- donor(allgenomes_exdb)
 ```
 
 | genome  | metabolites | receptors_n | metabolites_n |
@@ -367,7 +380,7 @@ allgenomes_donor <- donor(allgenomes_cfdb)
 Capacity of each bacterium to receive metabolites from other bacteria.
 
 ```r
-allgenomes_receptor <- receptor(allgenomes_cfdb)
+allgenomes_receptor <- receptor(allgenomes_exdb)
 ```
 
 | genome  | metabolites | donors_n | metabolites_n |
@@ -398,7 +411,7 @@ genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"
 #### Donor potential (donor)
 
 ```r
-allgenomes_donor <- donor(allgenomes_cfdb, abundance=genome_abundances)
+allgenomes_donor <- donor(allgenomes_exdb, abundance=genome_abundances)
 ```
 
 | genome  | sample1 | sample2 | sample3 |
@@ -415,7 +428,7 @@ The values in sample2 and sample3 are more different to the baseline donor poten
 It is also possible to focus on a single genome using the ***focus*** argument. This is mainly useful when working with large quantities of genomes, to speed up computation.
 
 ```r
-genome1_donor <- donor(allgenomes_cfdb, abundance=genome_abundances, focal="genome2")
+genome1_donor <- donor(allgenomes_exdb, abundance=genome_abundances, focal="genome2")
 ```
 
 | genome  | sample1 | sample2 | sample3 |
@@ -425,7 +438,7 @@ genome1_donor <- donor(allgenomes_cfdb, abundance=genome_abundances, focal="geno
 #### Receptor potential (receptor)
 
 ```r
-allgenomes_receptor <- receptor(allgenomes_cfdb, abundance=genome_abundances)
+allgenomes_receptor <- receptor(allgenomes_exdb, abundance=genome_abundances)
 ```
 
 | genome  | sample1 | sample2 | sample3 |

@@ -4,10 +4,10 @@
 \alias{donor}
 \title{Calculation of donor potential}
 \usage{
-donor(cfdb, abundance, focal)
+donor(exdb, abundance, focal)
 }
 \arguments{
-\item{cfdb}{A cross-feeding database (cfdb) generated using mdb2cfdb()}
+\item{exdb}{A exchange database (exdb) generated using mdb2exdb()}
 
 \item{abundance}{An optional data frame containing relative abundance data of bacteria}
 
@@ -20,10 +20,10 @@ Calculation of donor potential of each genome
 Calculation of donor potential
 }
 \examples{
-donor(allgenomes_cfdb)
-donor(allgenomes_cfdb, abundance=genome_abundances)
-donor(allgenomes_cfdb, abundance=genome_abundances, focal="genome1")
-donor(allgenomes_cfdb, focal=c("genome1","genome2"))
+donor(allgenomes_exdb)
+donor(allgenomes_exdb, abundance=genome_abundances)
+donor(allgenomes_exdb, abundance=genome_abundances, focal="genome1")
+donor(allgenomes_exdb, focal=c("genome1","genome2"))
 }
 \references{
 Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110

@@ -3,45 +3,45 @@
 #' @author Antton Alberdi, \email{anttonalberdi@gmail.com}
 #' @keywords SBML tibble reaction reactant product
 #' @description Calculation of receptor potential of each genome
-#' @param cfdb A cross-feeding database (cfdb) generated using mdb2cfdb()
+#' @param exdb A exchange database (exdb) generated using mdb2exdb()
 #' @param abundance An optional data frame containing relative abundance data of bacteria
 #' @param focal An optional focal genome name or vector of genome names to calculate receptor potential
 #' @import tidyverse
 #' @examples
-#' receptor(allgenomes_cfdb)
-#' receptor(allgenomes_cfdb, abundance=genome_abundances)
-#' receptor(allgenomes_cfdb, abundance=genome_abundances, focal="genome1")
-#' receptor(allgenomes_cfdb, focal=c("genome1","genome2"))
+#' receptor(allgenomes_exdb)
+#' receptor(allgenomes_exdb, abundance=genome_abundances)
+#' receptor(allgenomes_exdb, abundance=genome_abundances, focal="genome1")
+#' receptor(allgenomes_exdb, focal=c("genome1","genome2"))
 #' @references
 #' Keating, S.M. et al. (2020). SBML Level 3: an extensible format for the exchange and reuse of biological models. Molecular Systems Biology 16: e9110
 #' @export
 
-receptor <- function(cfdb, abundance, focal) {
+receptor <- function(exdb, abundance, focal) {
   # Input check
-  if (inherits(cfdb, "cfdb")) {
-    cfdb <- cfdb
+  if (inherits(exdb, "exdb")) {
+    exdb <- exdb
   } else {
-    stop("Input is not a valid cfdb object created by mdb2cfdb().")
+    stop("Input is not a valid exdb object created by mdb2exdb().")
   }
 
   # If no abundance data is provided
   if(missing(abundance)){
     if(missing(focal)){
-      forward <- cfdb %>%
+      forward <- exdb %>%
         filter(length(reverse) > 0) %>%
         group_by(first) %>%
         summarize(metabolites = list(unique(unlist(reverse))), donors_n=n()) %>%
         mutate(metabolites_n = map_int(metabolites, length)) %>%
         rename(genome=1)
 
-      reverse <- cfdb %>%
+      reverse <- exdb %>%
         filter(length(forward) > 0) %>%
         group_by(second) %>%
         summarize(metabolites = list(unique(unlist(forward))), donors_n=n()) %>%
         mutate(metabolites_n = map_int(metabolites, length)) %>%
         rename(genome=1)
     } else {
-      forward <- cfdb %>%
+      forward <- exdb %>%
         filter(length(reverse) > 0) %>%
         filter(first %in% focal) %>%
         group_by(first) %>%
@@ -49,7 +49,7 @@ receptor <- function(cfdb, abundance, focal) {
         mutate(metabolites_n = map_int(metabolites, length)) %>%
         rename(genome=1)
 
-      reverse <- cfdb %>%
+      reverse <- exdb %>%
         filter(length(forward) > 0) %>%
         filter(second %in% focal) %>%
         group_by(second) %>%
@@ -74,7 +74,7 @@ receptor <- function(cfdb, abundance, focal) {
 
     if(missing(focal)){
       suppressWarnings({
-        forward <- cfdb %>%
+        forward <- exdb %>%
           # Append abundance values of first and second genomes
           left_join(abundance %>%
                       rename_with(~ paste0(., "_firstX"), -1),
@@ -90,7 +90,7 @@ receptor <- function(cfdb, abundance, focal) {
                        values_drop_na = TRUE) %>%
           rename(metabolite=3)
 
-        reverse <- cfdb %>%
+        reverse <- exdb %>%
           # Append abundance values of first and second genomes
           left_join(abundance %>%
                       rename_with(~ paste0(., "_secondX"), -1),
@@ -108,7 +108,7 @@ receptor <- function(cfdb, abundance, focal) {
       })
     } else {
       suppressWarnings({
-      forward <- cfdb %>%
+      forward <- exdb %>%
         filter(first %in% focal) %>%
         # Append abundance values of first and second genomes
         left_join(abundance %>%
@@ -125,7 +125,7 @@ receptor <- function(cfdb, abundance, focal) {
                      values_drop_na = TRUE) %>%
         rename(metabolite=3)
 
-      reverse <- cfdb %>%
+      reverse <- exdb %>%
         filter(second %in% focal) %>%
         # Append abundance values of first and second genomes
         left_join(abundance %>%
