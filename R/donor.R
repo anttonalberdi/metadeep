@@ -76,7 +76,6 @@ donor <- function(exdb, abundance, focal, verbosity=TRUE) {
 
       #Filter by focal taxa and append abundances to exdb
       exdb_abun <- exdb %>%
-        filter(first %in% focal, second %in% focal) %>%
         left_join(abundance %>% select(genome,{{ sample }}) %>% rename(abun_first=2),
                   by=join_by(first==genome)) %>%
         left_join(abundance %>% select(genome,{{ sample }}) %>% rename(abun_second=2),
@@ -84,6 +83,7 @@ donor <- function(exdb, abundance, focal, verbosity=TRUE) {
 
       #Effective number of metabolites each genome in column first can provide to the rest of genomes in column second
       first2seconds <- exdb_abun %>%
+          filter(first %in% focal) %>%
           select(-reverse,-total) %>% 		# Drop reverse and total columns
           rename(abun_donor=abun_first,abun_receptor=abun_second) %>% #Rename abundances of first/second to donor/receptor
           unnest(cols = forward) %>% 			# Expand metabolites
@@ -95,6 +95,7 @@ donor <- function(exdb, abundance, focal, verbosity=TRUE) {
 
       #Effective number of metabolites each genome in column second can provide to the rest of genomes in column first
       second2firsts <- exdb_abun %>%
+        filter(second %in% focal) %>%
         select(-forward,-total) %>% 			# Drop reverse and total columns
         rename(abun_receptor=abun_first,abun_donor=abun_second) %>% #Rename abundances of first/second to receptor/donor
         unnest(cols = reverse) %>% 			# Expand metabolites
