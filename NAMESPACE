@@ -2,10 +2,11 @@
 
 export(donor)
 export(exdb2pair)
-export(mdb2exdb)
+export(gedb2exdb)
+export(gedb2medb)
 export(pair2igraph)
 export(pair2summary)
-export(rdb2mdb)
+export(rdb2gedb)
 export(receptor)
 export(sbml2rdb)
 import(SBMLR)

@@ -24,13 +24,14 @@ MetaDEEP only has three strict dependencies:
 ## Typical worflow
 
 1. **sbml2rdb()** to load SBML files into a reaction database.
-2. **rdb2mdb()** to generate a metabolite database.
-3. **mdb2exdb()** to generate a metabolite exchange database.
-4. **exdb2pair()** to transform metabolite exchange databases into pairwise matrices.
-5. **pair2summary()** to calculate summary statistics of metabolite exchanges.
-6. **pair2igraph()** to transform pairwise matrices into igraph network objects.
-7. **donor()** to calculate genome-specific donor capacities.
-8. **receptor()** to calculate genome-specific receptor capacities.
+2. **rdb2gedb()** to generate a genome-metabolite database.
+3. **gedb2medb()** to generate a metabolite-genome database.
+4. **gedb2exdb()** to generate a metabolite exchange database.
+5. **exdb2pair()** to transform metabolite exchange databases into pairwise matrices.
+6. **pair2summary()** to calculate summary statistics of metabolite exchanges.
+7. **pair2igraph()** to transform pairwise matrices into igraph network objects.
+8. **donor()** to calculate genome-specific donor capacities.
+9. **receptor()** to calculate genome-specific receptor capacities.
 
 ## Usage
 Basic usage of MetaDEEP package
@@ -92,8 +93,8 @@ $genome2
 | R_RXN__45__22610                         | <chr [2]>    | <chr [2]>    |
 | R_RXN__45__15920                         | <chr [2]>    | <chr [3]>    |
 
-### Classify metabolite types (rdb2mdb)
-Classify metabolites in a single-genome (rdb) or multi-genome (rdbs) reaction database into source, transit and sink metabolites stored in a metabolite database (mdb).
+### Classify metabolite types into a genome database (rdb2gedb)
+Classify metabolites in a single-genome (rdb) or multi-genome (rdbs) reaction database into source, transit and sink metabolites stored in a genome database (gedb).
 
 - **Source metabolites:** those that the bacterium is able to use but not to produce.
 - **Transit metabolites:** those that the bacterium is able to use and produce.
@@ -102,7 +103,7 @@ Classify metabolites in a single-genome (rdb) or multi-genome (rdbs) reaction da
 #### In a single genome
 
 ```r
-genome1_mdb <- rdb2mdb(genome1_rdb)
+genome1_gedb <- rdb2gedb(genome1_rdb)
 ```
 
 | genome  | sources    | transits   | sinks      | reactions | metabolites |
@@ -112,7 +113,7 @@ genome1_mdb <- rdb2mdb(genome1_rdb)
 #### In multiple genomes
 
 ```r
-allgenomes_mdb <- rdb2mdb(allgenomes_rdb)
+allgenomes_gedb <- rdb2gedb(allgenomes_rdb)
 ```
 
 | genome  | sources    | transits   | sinks      | reactions | metabolites |
@@ -122,7 +123,27 @@ allgenomes_mdb <- rdb2mdb(allgenomes_rdb)
 | genome3 | <chr [233]>| <chr [159]>| <chr [245]>| 395       | 637         |
 | genome4 | <chr [262]>| <chr [196]>| <chr [282]>| 508       | 740         |
 
-### Calculate metabolite exchange potential (mdb2exdb)
+### Convert a genome database into a metabolite database (gedb2medb)
+The genome database can be converted into a metabolite database to display the role each metabolite can play across genomes.
+
+```r
+allgenomes_gedb <- gedb2medb(allgenomes_gedb)
+```
+
+| metabolites                                                       | sinks       | transits | sources   | exchangable |
+|-------------------------------------------------------------------|-------------|----------|-----------|-------------|
+| M_10__45__FORMYL__45__DIHYDROFOLATE__45__GLU__45__N_c             | <chr>       | <NULL>   | <NULL>    | no          |
+| M_11Z__45__3__45__oxo__45__icos__45__11__45__enoyl__45__ACPs_c    | <NULL>      | <chr>    | <NULL>    | no          |
+| M_11Z__45__icos__45__11__45__enoyl__45__ACPs_c                    | <chr>       | <NULL>   | <NULL>    | no          |
+| M_ACETYL__45__D__45__GLUCOSAMINYLDIPHOSPHO__45__UNDECAPRE_c       | <chr [2]>   | <NULL>   | <chr [1]> | strict      |
+| M_AGMATHINE_c                                                      | <NULL>      | <chr [1]>| <chr [1]> | loose       |
+| M_13__45__HYDROXY__45__MAGNESIUM__45__PROTOPORP_c                 | <NULL>      | <chr>    | <NULL>    | no          |
+| M_16S__45__rRNA__45__2__45__O__45__methylcytidine1402_c           | <chr>       | <NULL>   | <NULL>    | no          |
+| M_CL__45___c                                                       | <chr [1]>   | <chr [1]>| <chr [1]> | strict      |
+| M_16S__45__rRNA__45__5__45__O__45__methylcytosine967_c            | <chr>       | <NULL>   | <NULL>    | no          |
+| M_CDPDIACYLGLYCEROL_c                                              | <NULL>      | <chr [3]>| <chr [1]> | loose       |
+
+### Calculate metabolite exchange potential (gedb2exdb)
 
 Calculate the capacity of each genome to provide or receive metabolites to/from other genomes. The resulting object is a tibble containing all pairwise combinations of genomes and their bi-directional as well as overall metabolite exchange capacities.
 
@@ -134,7 +155,7 @@ In strict mode (default) only source and sink metabolites are considered for cro
 - **Reverse:** sink metabolites of ***second*** that are source for ***first***
 
 ```r
-allgenomes_exdb <- mdb2exdb(allgenomes_mdb)
+allgenomes_exdb <- gedb2exdb(allgenomes_gedb)
 ```
 
 |  first   | second  | forward   | reverse   | total     |
@@ -154,7 +175,7 @@ In loose mode source, transit and sink metabolites are considered for cross-feed
 - **Reverse:** transit and sink metabolites of ***second*** that are source for ***first***
 
 ```r
-allgenomes_exdb <- mdb2exdb(allgenomes_mdb, mode="loose")
+allgenomes_exdb <- gedb2exdb(allgenomes_gedb, mode="loose")
 ```
 
 |  first   | second  | forward    | reverse    | total      |
