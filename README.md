@@ -132,16 +132,16 @@ allgenomes_gedb <- gedb2medb(allgenomes_gedb)
 
 | metabolites                                                       | sinks       | transits | sources   | exchangable |
 |-------------------------------------------------------------------|-------------|----------|-----------|-------------|
-| M_10__45__FORMYL__45__DIHYDROFOLATE__45__GLU__45__N_c             | <chr>       | <NULL>   | <NULL>    | no          |
-| M_11Z__45__3__45__oxo__45__icos__45__11__45__enoyl__45__ACPs_c    | <NULL>      | <chr>    | <NULL>    | no          |
-| M_11Z__45__icos__45__11__45__enoyl__45__ACPs_c                    | <chr>       | <NULL>   | <NULL>    | no          |
-| M_ACETYL__45__D__45__GLUCOSAMINYLDIPHOSPHO__45__UNDECAPRE_c       | <chr [2]>   | <NULL>   | <chr [1]> | strict      |
-| M_AGMATHINE_c                                                      | <NULL>      | <chr [1]>| <chr [1]> | loose       |
-| M_13__45__HYDROXY__45__MAGNESIUM__45__PROTOPORP_c                 | <NULL>      | <chr>    | <NULL>    | no          |
-| M_16S__45__rRNA__45__2__45__O__45__methylcytidine1402_c           | <chr>       | <NULL>   | <NULL>    | no          |
-| M_CL__45___c                                                       | <chr [1]>   | <chr [1]>| <chr [1]> | strict      |
-| M_16S__45__rRNA__45__5__45__O__45__methylcytosine967_c            | <chr>       | <NULL>   | <NULL>    | no          |
-| M_CDPDIACYLGLYCEROL_c                                              | <NULL>      | <chr [3]>| <chr [1]> | loose       |
+| M_10__45__FORMYL__45__DIHYDROFOLATE__45__GLU__45__N_c             | `<chr>`     | `<NULL>` | `<NULL>`  | no          |
+| M_11Z__45__3__45__oxo__45__icos__45__11__45__enoyl__45__ACPs_c    | `<NULL>`    | `<chr>`  | `<NULL>`  | no          |
+| M_11Z__45__icos__45__11__45__enoyl__45__ACPs_c                    | `<chr>`     | `<NULL>` | `<NULL>`  | no          |
+| M_ACETYL__45__D__45__GLUCOSAMINYLDIPHOSPHO__45__UNDECAPRE_c       | `<chr [2]>` | `<NULL>` | `<chr [1]>` | strict      |
+| M_AGMATHINE_c                                                      | `<NULL>`    | `<chr [1]>`| `<chr [1]>` | loose       |
+| M_13__45__HYDROXY__45__MAGNESIUM__45__PROTOPORP_c                 | `<NULL>`    | `<chr>`  | `<NULL>`  | no          |
+| M_16S__45__rRNA__45__2__45__O__45__methylcytidine1402_c           | `<chr>`     | `<NULL>` | `<NULL>`  | no          |
+| M_CL__45___c                                                       | `<chr [1]>` | `<chr [1]>`| `<chr [1]>` | strict      |
+| M_16S__45__rRNA__45__5__45__O__45__methylcytosine967_c            | `<chr>`     | `<NULL>` | `<NULL>`  | no          |
+| M_CDPDIACYLGLYCEROL_c                                              | `<NULL>`    | `<chr [3]>`| `<chr [1]>` | loose       |
 
 ### Calculate metabolite exchange potential (gedb2exdb)
 
