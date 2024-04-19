@@ -124,7 +124,7 @@ allgenomes_gedb <- rdb2gedb(allgenomes_rdb)
 | genome4 | <chr [262]>| <chr [196]>| <chr [282]>| 508       | 740         |
 
 ### Convert a genome database into a metabolite database (gedb2medb)
-The genome database can be converted into a metabolite database to display the role each metabolite can play across genomes.
+The genome database can be converted into a metabolite database to display the role each metabolite can play across genomes. The function also identifies the level of exchanging capacity depending on the role of the metabolite as source, transit or sink across different genomes.
 
 ```r
 allgenomes_gedb <- gedb2medb(allgenomes_gedb)
