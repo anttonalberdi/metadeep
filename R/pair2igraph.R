@@ -33,7 +33,7 @@ pair2igraph <- function(pair, mode="undirected") {
     return(igraph)
   }
 
-
+  #Apply function
   if (!inherits(pair, "list")) {
     # If input is a single matrix
     igraph <- pair2igraph_func(pair,mode=mode)

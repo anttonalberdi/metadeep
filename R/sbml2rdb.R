@@ -38,6 +38,9 @@ sbml2rdb <- function(sbml) {
     stop("Input is neither an SBMLR object nor, a vector of SBML files, or a validSBML file.")
   }
 
+  #Flatten if a single genome
+  if(length(rdb) == 1){rdb <- rdb[[1]]}
+
   # Output reaction database
   return(rdb)
 }

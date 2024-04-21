@@ -3,7 +3,7 @@
 #' @author Antton Alberdi, \email{anttonalberdi@gmail.com}
 #' @keywords SBML tibble reaction reactant product rdb
 #' @description Classification of metabolites in a single genome into source, transit and sink metabolites
-#' @param rdb An rdb object produced by sbml2rdb().
+#' @param rdb A reaction database (rdb object) produced by sbml2rdb().
 #' @import tidyverse
 #' @examples
 #' rdb2gedb(genome1_rdb)

@@ -93,6 +93,35 @@ $genome2
 | R_RXN__45__22610                         | <chr [2]>    | <chr [2]>    |
 | R_RXN__45__15920                         | <chr [2]>    | <chr [3]>    |
 
+### Convert a genome database into an igraph network
+
+```r
+genome1_igraph <- rdb2igraph(genome1_rdb)
+allgenomes_igraph <- rdb2igraph(allgenomes_rdb)
+```
+
+#### Visualise the network
+
+```r
+genome1_igraph %>%
+  as.undirected() %>%
+  plot(., 
+        layout = layout_with_fr(genome1_igraph), 
+        #vertex attributes
+        vertex.color=V(genome1_igraph)$color,
+        vertex.frame.color=NA,
+        vertex.label=NA,
+        vertex.size=1.5,
+        #edge attributes
+        edge.label = NA, 
+        edge.curved = 0.1,
+        edge.color="#cccccc70",
+        edge.label.color="#8E8E1E"
+        )
+```
+
+![Metabolic networks](figures/metabolite_networks.png)
+
 ### Classify metabolite types into a genome database (rdb2gedb)
 Classify metabolites in a single-genome (rdb) or multi-genome (rdbs) reaction database into source, transit and sink metabolites stored in a genome database (gedb).
 
