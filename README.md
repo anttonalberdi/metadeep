@@ -24,14 +24,15 @@ MetaDEEP only has three strict dependencies:
 ## Typical worflow
 
 1. **sbml2rdb()** to load SBML files into a reaction database.
-2. **rdb2gedb()** to generate a genome-metabolite database.
-3. **gedb2medb()** to generate a metabolite-genome database.
-4. **gedb2exdb()** to generate a metabolite exchange database.
-5. **exdb2pair()** to transform metabolite exchange databases into pairwise matrices.
-6. **pair2summary()** to calculate summary statistics of metabolite exchanges.
-7. **pair2igraph()** to transform pairwise matrices into igraph network objects.
-8. **donor()** to calculate genome-specific donor capacities.
-9. **receptor()** to calculate genome-specific receptor capacities.
+2. **rdb2igraph()** to generate genome-specific igraph network objects.
+3. **rdb2gedb()** to generate a genome-metabolite database.
+4. **gedb2medb()** to generate a metabolite-genome database.
+5. **gedb2exdb()** to generate a metabolite exchange database.
+6. **exdb2pair()** to transform metabolite exchange databases into pairwise matrices.
+7. **pair2summary()** to calculate summary statistics of metabolite exchanges.
+8. **pair2igraph()** to transform pairwise matrices into igraph network objects.
+9. **donor()** to calculate genome-specific donor capacities.
+10. **receptor()** to calculate genome-specific receptor capacities.
 
 ## Usage
 Basic usage of MetaDEEP package
@@ -93,7 +94,7 @@ $genome2
 | R_RXN__45__22610                         | <chr [2]>    | <chr [2]>    |
 | R_RXN__45__15920                         | <chr [2]>    | <chr [3]>    |
 
-### Convert a genome database into an igraph network
+### Convert a reaction database into an igraph network (rdb2igraph)
 
 ```r
 genome1_igraph <- rdb2igraph(genome1_rdb)
