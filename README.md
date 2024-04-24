@@ -157,7 +157,7 @@ allgenomes_gedb <- rdb2gedb(allgenomes_rdb)
 The genome database can be converted into a metabolite database to display the role each metabolite can play across genomes. The function also identifies the level of exchanging capacity depending on the role of the metabolite as source, transit or sink across different genomes.
 
 ```r
-allgenomes_gedb <- gedb2medb(allgenomes_gedb)
+allgenomes_medb <- gedb2medb(allgenomes_gedb)
 ```
 
 | metabolites                                                       | sinks       | transits | sources   | exchangable |
@@ -459,10 +459,10 @@ genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"
 | genome3 |   0.25  |   0.1   |   0.05  |
 | genome4 |   0.25  |   0.1   |   0.05  |
 
-#### Donor potential (donor)
+#### Donor potential (exdb2focal, exchange="donor")
 
 ```r
-allgenomes_donor <- donor(allgenomes_exdb, abundance=genome_abundances)
+allgenomes_donor <- donor(allgenomes_exdb, exchange="donor", abundance=genome_abundances)
 ```
 
 | genome  | sample1 | sample2 | sample3 |
@@ -479,17 +479,17 @@ The values in sample2 and sample3 are more different to the baseline donor poten
 It is also possible to focus on a single genome using the ***focus*** argument. This is mainly useful when working with large quantities of genomes, to speed up computation.
 
 ```r
-genome1_donor <- donor(allgenomes_exdb, abundance=genome_abundances, focal="genome2")
+genome1_donor <- exdb2focal(allgenomes_exdb, exchange="donor", abundance=genome_abundances, focal="genome2")
 ```
 
 | genome  | sample1 | sample2 | sample3 |
 |---------|---------|---------|---------|
 | genome2 |     7.5 |       8 |    6.56 |
 
-#### Receptor potential (receptor)
+#### Receptor potential (exdb2focal, exchange="receptor")
 
 ```r
-allgenomes_receptor <- receptor(allgenomes_exdb, abundance=genome_abundances)
+allgenomes_receptor <- exdb2focal(allgenomes_exdb, exchange="receptor", abundance=genome_abundances)
 ```
 
 | genome  | sample1 | sample2 | sample3 |

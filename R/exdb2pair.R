@@ -103,7 +103,7 @@ exdb2pair <- function(exdb, exchange=c("forward","reverse","total"), abundance, 
                      values_drop_na = TRUE) %>%
         rename(metabolite=3) %>%
         group_by(first,second,metabolite) %>%
-        summarise(across(where(is.double), ~ pmin(1, max(.x[genome == "first"]) / sum(.x[genome == "second"]))), .groups = "drop") %>%
+        summarise(across(where(is.double), ~ pmin(1, .x[genome == "first"] / .x[genome == "second"])), .groups = "drop") %>%
         mutate_if(is.double, ~ifelse(is.nan(.), 0, .)) %>% #convert NaNs derived from n/0 to 0
         rowwise() %>%
         group_by(first,second) %>%
@@ -120,7 +120,7 @@ exdb2pair <- function(exdb, exchange=c("forward","reverse","total"), abundance, 
                        values_drop_na = TRUE) %>%
         rename(metabolite=3) %>%
         group_by(second,first,metabolite) %>%
-        summarise(across(where(is.double), ~ pmin(1, max(.x[genome == "second"]) / sum(.x[genome == "first"]))), .groups = "drop") %>%
+        summarise(across(where(is.double), ~ pmin(1, .x[genome == "second"] / .x[genome == "first"])), .groups = "drop") %>%
         mutate_if(is.double, ~ifelse(is.nan(.), 0, .)) %>% #convert NaNs derived from n/0 to 0
         rowwise() %>%
         group_by(first,second) %>%
