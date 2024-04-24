@@ -19,7 +19,8 @@ sbml2rdb <- function(sbml) {
     rdb <- tibble(
       reaction = sapply(reactions, function(x) x$id),
       reactants = lapply(reactions, function(x) x$reactants),
-      products = lapply(reactions, function(x) x$products)
+      products = lapply(reactions, function(x) x$products),
+      reversible = sapply(reactions, function(x) x$reversible)
     )
     return(rdb)
   }
