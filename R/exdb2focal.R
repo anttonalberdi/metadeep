@@ -154,8 +154,10 @@ exdb2focal <- function(exdb, exchange="total", abundance, focal, verbosity=TRUE)
 
         #Merge tables and calculate metabolite exchanges
         donor_potential_sample <- bind_rows(first2seconds,second2firsts) %>%
+          group_by(metabolite, genome) %>%
+          mutate(relabun = abun / (sum(abun)/n_distinct(receptor))) %>% #relative abundance respect to sum of abundances
           group_by(donor,metabolite) %>%
-          summarise(potential = pmin(1, max(abun[genome == "donor"]) / sum(abun[genome == "receptor"])), .groups = "drop") %>%
+          summarise(potential = pmin(1, max(abun[genome == "donor"] * relabun[genome == "donor"]) / sum(abun[genome == "receptor"])), .groups = "drop") %>%
           mutate(potential = if_else(is.na(potential), 0, potential)) %>% #convert NaNs derived from n/0 to 0
           rename(genome=1) %>%
           rowwise() %>%
@@ -193,8 +195,10 @@ exdb2focal <- function(exdb, exchange="total", abundance, focal, verbosity=TRUE)
 
         #Merge tables and calculate metabolite exchanges
         receptor_potential_sample <- bind_rows(seconds2first,firsts2second) %>%
+          group_by(metabolite, genome) %>%
+          mutate(relabun = abun / (sum(abun)/n_distinct(donor))) %>% #relative abundance of receptors respect to sum of abundances
           group_by(receptor,metabolite) %>%
-          summarise(potential = pmin(1, sum(abun[genome == "donor"]) / max(abun[genome == "receptor"]))) %>%
+          summarise(potential = pmin(1, sum(abun[genome == "donor"]) / max(abun[genome == "receptor"] * relabun[genome == "receptor"])), .groups = "drop") %>%
           mutate(potential = if_else(is.na(potential), 0, potential)) %>% #convert NaNs derived from n/0 to 0
           rename(genome=1) %>%
           rowwise() %>%

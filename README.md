@@ -416,7 +416,7 @@ These calculations overlook relative abundances of bacteria, and only capture th
 Capacity of each bacterium to provide other bacteria with metabolites.
 
 ```r
-allgenomes_donor <- donor(allgenomes_exdb)
+allgenomes_donor <- exdb2focal(allgenomes_exdb, exchange="donor")
 ```
 
 | genome  | metabolites | receptors_n | metabolites_n |
@@ -431,7 +431,7 @@ allgenomes_donor <- donor(allgenomes_exdb)
 Capacity of each bacterium to receive metabolites from other bacteria.
 
 ```r
-allgenomes_receptor <- receptor(allgenomes_exdb)
+allgenomes_receptor <- exdb2focal(allgenomes_exdb, exchange="receptor")
 ```
 
 | genome  | metabolites | donors_n | metabolites_n |
@@ -462,7 +462,7 @@ genome_abundances <- data.frame(genome=c("genome1","genome2","genome3","genome4"
 #### Donor potential (exdb2focal, exchange="donor")
 
 ```r
-allgenomes_donor <- donor(allgenomes_exdb, exchange="donor", abundance=genome_abundances)
+allgenomes_donor <- exdb2focal(allgenomes_exdb, exchange="donor", abundance=genome_abundances)
 ```
 
 | genome  | sample1 | sample2 | sample3 |
