@@ -1,6 +1,6 @@
 # MetaDEEP
 
-MetaDEEP, the **Meta**bolic **D**ependence and **E**xchange **E**valuation **P**ackage, is an R package to analyse metabolic dependence and exchange metrics from genome-scale metabolic networks (GSMN).
+MetaDEEP, the **Meta**bolic **D**ependence and **E**xchange **E**valuation **P**ackage, is an R package to analyse metabolic dependence and exchange metrics of microbiomes based on genome-scale metabolic networks (GSMN) and genome abundance data. MetaDEEP identifies metabolites that can be exchanged among bacteria in a community based on GSMNs, and calculates effective metabolite exchange values between genomes, accounting for the number of donors and receptors for each metabolite and their respective relative abundances. The summarisation of pairwise exchanges yields genome-, metabolite- and sample-level metabolite exchange metrics that allow characterising microbiome structures in terms of effective metabolite exchange capacities.  
 
 ## Installation
 
@@ -23,7 +23,7 @@ MetaDEEP only has three strict dependencies:
 
 ## Worflow
 
-MetaDEEP can be run using the master function **metadeep()**, which  pipes all the intermediate steps and yields summary metabolite metrics for microbiomes.
+MetaDEEP can simply be used by running the master function **metadeep()**, which pipes all the intermediate steps and yields summary metabolite exchange metrics for microbiomes.
 
 ```r
 sbml_files <- list.files(path = "data", pattern = "\\.sbml$", full.names = TRUE)
@@ -41,7 +41,7 @@ The function**metadeep()** runs the following workflow:
 
 If working with large data sets, or exploring different metabolite exchange characteristics, it is adviced to run the workflow step-by-step, to better customise the analyses.
 
-## Usage
+## Step-by-step usage
 
 Step-by-step usage and interpretation of the MetaDEEP package and its contents.
 
