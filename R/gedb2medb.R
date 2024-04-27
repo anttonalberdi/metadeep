@@ -15,12 +15,12 @@ gedb2medb <- function(gedb) {
 
   medb <- gedb %>%
     select(genome,sources,transits,sinks) %>%
-    pivot_longer(cols = c(sources, transits, sinks), names_to = "type", values_to = "metabolites") %>%
-    unnest(cols = metabolites) %>%
-    group_by(metabolites, type) %>%
+    pivot_longer(cols = c(sources, transits, sinks), names_to = "type", values_to = "metabolite") %>%
+    unnest(cols = metabolite) %>%
+    group_by(metabolite, type) %>%
     summarise(genomes=list(unique(genome)), .groups = "drop") %>%
     pivot_wider(names_from = type, values_from = genomes) %>%
-    mutate(exchangable = ifelse(lengths(sinks) > 0 & lengths(sources) > 0, "strict",
+    mutate(exchangeable = ifelse(lengths(sinks) > 0 & lengths(sources) > 0, "strict",
                                 ifelse((lengths(transits) > 0 | lengths(sinks) > 0) & lengths(sources) > 0, "loose", "no")))
 
   return(medb)
