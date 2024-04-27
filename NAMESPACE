@@ -3,6 +3,7 @@
 export(exdb2summary)
 export(gedb2medb)
 export(medb2exdb)
+export(metadeep)
 export(rdb2gedb)
 export(rdb2igraph)
 export(sbml2rdb)

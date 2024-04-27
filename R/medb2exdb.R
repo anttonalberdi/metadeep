@@ -26,6 +26,10 @@ medb2exdb <- function(medb, mode="strict", abundance, metabolites, genomes, samp
   # If no abundance data is provided
   if(missing(abundance)){
     abundance <- tibble(genome=genomes,exchange=rep(1/length(genomes),length(genomes)))
+  }else{
+    #Force relative abundance transformation
+    abundance <- abundance %>%
+      mutate(across(where(is.double), ~ ./sum(.)))
   }
 
   # If no sample information is provided

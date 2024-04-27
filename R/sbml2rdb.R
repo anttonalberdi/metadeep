@@ -3,7 +3,7 @@
 #' @author Antton Alberdi, \email{anttonalberdi@gmail.com}
 #' @keywords SBML tibble reaction reactant product
 #' @description Convert a SBML file into a tibble contain details of all reactions in a genome
-#' @param sbml An object of class SBMLR or an sbml file.
+#' @param sbml An object of class SBMLR, an sbml file or a vector of smbl files.
 #' @import tidyverse SBMLR
 #' @examples
 #' sbml2rdb("data/genome1.sbml")

@@ -7,7 +7,7 @@
 sbml2rdb(sbml)
 }
 \arguments{
-\item{sbml}{An object of class SBMLR or an sbml file.}
+\item{sbml}{An object of class SBMLR, an sbml file or a vector of smbl files.}
 }
 \description{
 Convert a SBML file into a tibble contain details of all reactions in a genome

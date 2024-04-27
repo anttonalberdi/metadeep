@@ -21,7 +21,16 @@ MetaDEEP only has three strict dependencies:
 - [SBMLR](https://www.bioconductor.org/packages/release/bioc/html/SBMLR.html)
 - [igraph](https://igraph.org)
 
-## Typical worflow
+## Worflow
+
+MetaDEEP can be run using the master function **metadeep()**, which  pipes all the intermediate steps and yields summary metabolite metrics for microbiomes.
+
+```r
+sbml_files <- list.files(path = "data", pattern = "\\.sbml$", full.names = TRUE)
+metadeep(sbml_files)
+```
+
+The function**metadeep()** runs the following workflow:
 
 1. **sbml2rdb()** to load SBML files into a reaction database.
 2. **rdb2igraph()** to generate genome-specific igraph network objects.
@@ -30,8 +39,11 @@ MetaDEEP only has three strict dependencies:
 5. **medb2exdb()** to generate a metabolite exchange database.
 6. **exdb2summary()** to summarise metabolite exchange metrics in diverse ways.
 
+If working with large data sets, or exploring different metabolite exchange characteristics, it is adviced to run the workflow step-by-step, to better customise the analyses.
+
 ## Usage
-Basic usage of MetaDEEP package
+
+Step-by-step usage and interpretation of the MetaDEEP package and its contents.
 
 ### Load a single SBML (sbml2rdb)
 Load and convert a SBML file into MetaDEEP reaction database (rdb). The resulting object is a tibble containing character lists of reactants and products of each reaction. 
@@ -238,12 +250,12 @@ allgenomes_summary <- exdb2summary(allgenomes_exdb)
 ```
 
 $genomes
-| donor   | sample1 | sample2 | sample3 |
+| genome  | sample1 | sample2 | sample3 |
 |---------|---------|---------|---------|
-| genome1 | 2.5     | 1.57    | 0.588   |
-| genome2 | 9.33    | 7.24    | 6.94    |
-| genome3 | 6       | 1.90    | 3.42    |
-| genome4 | 9.17    | 4.04    | 5.20    |
+| genome1 | 4.25    | 3.76    | 1.03    |
+| genome2 | 8.29    | 5.33    | 5.64    |
+| genome3 | 5.75    | 2.21    | 3.59    |
+| genome4 | 8.71    | 3.45    | 5.88    |
 
 $metabolites
 | metabolite                                                  | sample1 | sample2 | sample3 |
