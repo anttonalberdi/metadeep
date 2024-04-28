@@ -38,6 +38,7 @@ The function**metadeep()** runs the following workflow:
 4. **gedb2medb()** to generate a metabolite-genome database.
 5. **medb2exdb()** to generate a metabolite exchange database.
 6. **exdb2summary()** to summarise metabolite exchange metrics in diverse ways.
+7. **exdb2pair()** to display exchange metrics into pairwise matrices.
 
 If working with large data sets, or exploring different metabolite exchange characteristics, it is adviced to run the workflow step-by-step, to better customise the analyses.
 
@@ -330,3 +331,9 @@ $samples
 |---------|----------|
 | sample2 | 1.28     |
 | sample3 | 0.118    |
+
+### Pairwise exchange matrix (exdb2pair)
+
+```r
+allgenomes_pair <- exdb2pair(allgenomes_exdb)
+```
