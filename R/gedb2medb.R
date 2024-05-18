@@ -21,7 +21,8 @@ gedb2medb <- function(gedb) {
     summarise(genomes=list(unique(genome)), .groups = "drop") %>%
     pivot_wider(names_from = type, values_from = genomes) %>%
     mutate(exchangeable = ifelse(lengths(sinks) > 0 & lengths(sources) > 0, "strict",
-                                ifelse((lengths(transits) > 0 | lengths(sinks) > 0) & lengths(sources) > 0, "loose", "no")))
+                                ifelse((lengths(transits) > 0 | lengths(sinks) > 0) & lengths(sources) > 0, "loose", "no"))) %>%
+    mutate(competition=ifelse(lengths(sources) > 1,"yes","no"))
 
   return(medb)
 

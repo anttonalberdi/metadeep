@@ -98,7 +98,11 @@ exdb2summary <- function(exdb,summarise=c("genomes","metabolites","samples"), ex
 
    samples_total <- metabolites_total %>%
       summarise(across(where(is.double), \(x) sum(x, na.rm = TRUE))) %>%
-     pivot_longer(cols = everything(), names_to = "sample", values_to = "exchange")
+     pivot_longer(cols = everything(), names_to = "sample", values_to = "effective_exchange") %>%
+     mutate(maximum_exchange=exdb_filt %>% summarise(across(where(is.double), ~ sum(. != 0))) %>% c() %>% unlist()) %>%
+     mutate(exchange_maximisation=effective_exchange/maximum_exchange) %>%
+     mutate(n_genomes=genomes_average %>% summarise(across(where(is.double), ~ sum(. != 0))) %>% c() %>% unlist()) %>%
+     mutate(int_per_genome=maximum_exchange/n_genomes)
     summary$samples <- samples_total
 
   }

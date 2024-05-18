@@ -27,7 +27,7 @@ MetaDEEP can simply be used by running the master function **metadeep()**, which
 
 ```r
 sbml_files <- list.files(path = "data", pattern = "\\.sbml$", full.names = TRUE)
-metadeep(sbml_files)
+metadeep(sbml_files, abundance=genome_abundances, summarise="samples")
 ```
 
 The function**metadeep()** runs the following workflow:
@@ -331,6 +331,21 @@ $samples
 |---------|----------|
 | sample2 | 1.28     |
 | sample3 | 0.118    |
+
+#### Diversity-weighed exchange
+
+```r
+library(hilldiv2)
+diversity <- genome_abundances %>%
+  column_to_rownames(var="genome") %>%
+  hilldiv(.,q=1) %>% t() %>%
+  as.data.frame() %>%
+  rownames_to_column(var="sample")
+  
+exdb2summary(allgenomes_exdb, summarise="samples") %>%
+  left_join(diversity,by="sample") %>%
+  mutate(exchange_w=exchange/q1)
+```
 
 ### Pairwise exchange matrix (exdb2pair)
 
